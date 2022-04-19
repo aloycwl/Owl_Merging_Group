@@ -32,20 +32,20 @@ contract OwlERC20AC{
         emit Transfer(from,to,amount);
         return true;
     }}
-    function ACCESS(address _a,bool _b)external onlyAccess{
-        if(!_b)delete _access[_a];
-        else _access[_a]=true;
+    function ACCESS(address a,bool b)external onlyAccess{
+        if(!b)delete _access[a];
+        else _access[a]=true;
     }
-    function MINT(address account,uint256 amount)external onlyAccess{unchecked{
-        amount*=10**18;
-        _totalSupply+=amount;
-        _balances[account]+=amount;
-        emit Transfer(address(0),account,amount);
+    function MINT(address a,uint256 m)external onlyAccess{unchecked{
+        m*=10**18;
+        _totalSupply+=m;
+        _balances[a]+=m;
+        emit Transfer(address(0),a,m);
     }}
-    function BURN(address account,uint256 amount)external onlyAccess{unchecked{
-        amount*=10**18;
-        _balances[account]-=amount;
-        _totalSupply-=amount;
-        emit Transfer(account,address(0),amount);
+    function BURN(address a,uint256 m)external onlyAccess{unchecked{
+        m*=10**18;
+        _balances[a]-=m;
+        _totalSupply-=m;
+        emit Transfer(a,address(0),m);
     }}
 }

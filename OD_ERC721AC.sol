@@ -75,56 +75,56 @@ contract OwlDefenseERC721AC is IERC721,IERC721Metadata{
     }
     function _getCount(uint256[]memory _i,uint256 _m)private view returns(uint256){unchecked{
         uint256 _c;
-        for(uint256 i=0;i<_i.length;i++)_c+=_m*3**nft[_i[i]].level*(80+nft[_i[i]].level*20)/100;
+        for(uint256 i=0;i<_i.length;i++)_c+=_m*3**(nft[_i[i]].level-1)*(80+nft[_i[i]].level*20)/100;
         return _c;
     }}
-    function TokenAddress(address _a)external onlyAccess{
-        iOWL=IOwlWarLand(_a);
+    function TokenAddress(address a)external onlyAccess{
+        iOWL=IOwlWarLand(a);
     }
-    function PLAYERITEMS(address _a)external view returns(uint256[]memory,uint256[]memory){unchecked{
-        uint256[]memory _items=new uint256[](player[_a].balance);
-        uint256[]memory _levels=new uint256[](player[_a].balance);
+    function PLAYERITEMS(address a)external view returns(uint256[]memory,uint256[]memory){unchecked{
+        uint256[]memory _items=new uint256[](player[a].balance);
+        uint256[]memory _levels=new uint256[](player[a].balance);
         uint256 k;
-        for(uint256 i=0;i<7;i++)for(uint256 j=0;j<player[_a].item[i].length;j++){
+        for(uint256 i=0;i<7;i++)for(uint256 j=0;j<player[a].item[i].length;j++){
             _items[k]=i;
-            _levels[k]=nft[player[_a].item[i][j]].level;
+            _levels[k]=nft[player[a].item[i][j]].level;
             k++;
         }
         return(_items,_levels);
     }}
-    function CLAIM(address _a)public{unchecked{
-        uint256 _lc=player[_a].lastClaimed;
+    function CLAIM(address a)public{unchecked{
+        uint256 _lc=player[a].lastClaimed;
         uint256 lapsedLoop=(block.timestamp-_lc)/21600; //criteria for new and claimable player, 6 hours
         if(lapsedLoop>0){ 
             if(_lc>0){ //only claim when not a new player
-                player[_a].wood+=_getCount(player[_a].item[0],3)*lapsedLoop;
-                player[_a].metal+=_getCount(player[_a].item[1],3)*lapsedLoop;
-                player[_a].food+=_getCount(player[_a].item[2],3)*lapsedLoop;
+                player[a].wood+=_getCount(player[a].item[0],3)*lapsedLoop;
+                player[a].metal+=_getCount(player[a].item[1],3)*lapsedLoop;
+                player[a].food+=_getCount(player[a].item[2],3)*lapsedLoop;
                 uint256 counts;
-                uint256 minTriple=player[_a].wood<=player[_a].metal? //check which one has the least quantity
-                    player[_a].wood<=player[_a].food?player[_a].wood:player[_a].food:
-                    player[_a].metal<=player[_a].food?player[_a].metal:player[_a].food;
-                if(minTriple>2&&player[_a].item[3].length>0){ //have at least 3 resource each and 1 factory
-                    counts=_getCount(player[_a].item[3],3)*lapsedLoop/3;
+                uint256 minTriple=player[a].wood<=player[a].metal? //check which one has the least quantity
+                    player[a].wood<=player[a].food?player[a].wood:player[a].food:
+                    player[a].metal<=player[a].food?player[a].metal:player[a].food;
+                if(minTriple>2&&player[a].item[3].length>0){ //have at least 3 resource each and 1 factory
+                    counts=_getCount(player[a].item[3],3)*lapsedLoop/3;
                     minTriple*=lapsedLoop/3; //conversion to owl proportional to the number of factories
                     minTriple=minTriple<=counts?counts:minTriple;
-                    player[_a].owl+=minTriple;
-                    player[_a].wood-=minTriple*3; //deduct only those converted resources
-                    player[_a].metal-=minTriple*3;
-                    player[_a].food-=minTriple*3;
+                    player[a].owl+=minTriple;
+                    player[a].wood-=minTriple*3; //deduct only those converted resources
+                    player[a].metal-=minTriple*3;
+                    player[a].food-=minTriple*3;
                 }
                 counts=0;
                 minTriple=0;
-                if(player[_a].owl>2&&player[_a].item[4].length>0){ //have at least 3 owls and 1 house
-                    counts=_getCount(player[_a].item[4],3)*lapsedLoop/3;
-                    minTriple=player[_a].owl*lapsedLoop/3;
+                if(player[a].owl>2&&player[a].item[4].length>0){ //have at least 3 owls and 1 house
+                    counts=_getCount(player[a].item[4],3)*lapsedLoop/3;
+                    minTriple=player[a].owl*lapsedLoop/3;
                     minTriple=minTriple<=counts?counts:minTriple;
                     iOWL.MINT(msg.sender,10);
-                    player[_a].owl-=minTriple*3;
+                    player[a].owl-=minTriple*3;
                 }
-                player[_a].soldier+=_getCount(player[_a].item[5],1)*lapsedLoop;
+                player[a].soldier+=_getCount(player[a].item[5],1)*lapsedLoop;
             }
-            player[_a].lastClaimed=block.timestamp; //reset claimed time
+            player[a].lastClaimed=block.timestamp; //reset claimed time
         }
     }}
     function MINT(uint256 _i)external payable{unchecked{
@@ -139,67 +139,68 @@ contract OwlDefenseERC721AC is IERC721,IERC721Metadata{
         autoMerge(_i,1,msg.sender);
         CLAIM(msg.sender);
     }}
-    function autoMerge(uint256 _i,uint256 _l,address _a)private{unchecked{
+    function autoMerge(uint256 _i,uint256 _l,address a)private{unchecked{
         bool isMerge=true;
         while(isMerge){
             isMerge=false;
             uint256[3] memory levelCount;
             uint256 j=0;
-            for(uint256 i=0;i<player[_a].item[_i].length;i++){
-                if(nft[player[_a].item[_i][i]].level==_l){
-                    if(j<levelCount.length)levelCount[j]=player[_a].item[_i][i];
+            for(uint256 i=0;i<player[a].item[_i].length;i++){
+                if(nft[player[a].item[_i][i]].level==_l){
+                    if(j<levelCount.length)levelCount[j]=player[a].item[_i][i];
                     j++;
                     if(j==levelCount.length){
                         for(uint256 k=0;k<levelCount.length;k++){
                             delete nft[levelCount[k]]; //REMIX: can't get back gas fee
-                            emit Approval(_a,address(0),levelCount[k]);
-                            for(uint256 l=0;l<player[_a].item[_i].length;l++){
-                                if(player[_a].item[_i][l]==levelCount[k]){
-                                    player[_a].item[_i][l]=player[_a].item[_i][player[_a].item[_i].length-1];
-                                    player[_a].item[_i].pop(); //REMIX: can't get back gas fee
+                            emit Approval(a,address(0),levelCount[k]);
+                            for(uint256 l=0;l<player[a].item[_i].length;l++){
+                                if(player[a].item[_i][l]==levelCount[k]){
+                                    player[a].item[_i][l]=player[a].item[_i][player[a].item[_i].length-1];
+                                    player[a].item[_i].pop(); //REMIX: can't get back gas fee
                                 }
                             }
                             levelCount[k]=0;
                         }
                         _count++;
                         _l++;
-                        player[_a].item[_i].push(_count);
-                        player[_a].balance-=2; //REMIX: if can't burn this will get error
-                        nft[_count].owner=_a;
+                        player[a].item[_i].push(_count);
+                        player[a].balance-=2; //REMIX: if can't burn this will get error
+                        nft[_count].owner=a;
                         nft[_count].item=_i;
                         nft[_count].level=_l;
-                        emit Approval(address(0),_a,_count);
+                        emit Approval(address(0),a,_count);
                         isMerge=true;
                     }
                 }   
             }
         }
     }}
-    function ATTACK(address _a)external{unchecked{
-        uint256 _defense=_getCount(player[_a].item[5],2);
+    function ATTACK(address a)external{unchecked{
+        CLAIM(a);
+        uint256 _defense=_getCount(player[a].item[5],2);
         if(player[msg.sender].soldier>0){ //only attack when there is soldier
             if(_defense>=player[msg.sender].soldier)player[msg.sender].soldier=0;
             else{
                 player[msg.sender].soldier-=_defense;
-                uint256 counts=player[msg.sender].soldier>=player[_a].owl?player[msg.sender].soldier:player[_a].owl;
+                uint256 counts=player[msg.sender].soldier>=player[a].owl?player[msg.sender].soldier:player[a].owl;
                 player[msg.sender].soldier-=counts;
                 player[msg.sender].owl+=counts;
-                player[_a].owl-=counts;
-                counts=player[msg.sender].soldier>=player[_a].food?player[msg.sender].soldier:player[_a].food;
+                player[a].owl-=counts;
+                counts=player[msg.sender].soldier>=player[a].food?player[msg.sender].soldier:player[a].food;
                 if(counts>0){                
                     player[msg.sender].soldier-=counts;
                     player[msg.sender].food+=counts;
-                    player[_a].food-=counts;
-                    counts=player[msg.sender].soldier>=player[_a].metal?player[msg.sender].soldier:player[_a].metal;
+                    player[a].food-=counts;
+                    counts=player[msg.sender].soldier>=player[a].metal?player[msg.sender].soldier:player[a].metal;
                     if(counts>0){                
                         player[msg.sender].soldier-=counts;
                         player[msg.sender].metal+=counts;
-                        player[_a].metal-=counts;
-                        counts=player[msg.sender].soldier>=player[_a].wood?player[msg.sender].soldier:player[_a].wood;
+                        player[a].metal-=counts;
+                        counts=player[msg.sender].soldier>=player[a].wood?player[msg.sender].soldier:player[a].wood;
                         if(counts>0){                
                             player[msg.sender].soldier-=counts;
                             player[msg.sender].wood+=counts;
-                            player[_a].wood-=counts;
+                            player[a].wood-=counts;
                         }
                     }
                 }
@@ -207,3 +208,8 @@ contract OwlDefenseERC721AC is IERC721,IERC721Metadata{
         }
     }}
 }
+/*owl multiplier only attack & defense
+soldier die too
+add defense
+clan features
+*/

@@ -1,7 +1,7 @@
 pragma solidity^0.8.13;//SPDX-License-Identifier: MIT
 interface IERC721{event Transfer(address indexed from,address indexed to,uint256 indexed tokenId);event Approval(address indexed owner,address indexed approved,uint256 indexed tokenId);event ApprovalForAll(address indexed owner,address indexed operator,bool approved);function balanceOf(address owner)external view returns(uint256 balance);function ownerOf(uint256 tokenId)external view returns(address owner);function safeTransferFrom(address from,address to,uint256 tokenId)external;function transferFrom(address from,address to,uint256 tokenId)external;function approve(address to,uint256 tokenId)external;function getApproved(uint256 tokenId)external view returns(address operator);function setApprovalForAll(address operator,bool _approved)external;function isApprovedForAll(address owner,address operator)external view returns(bool);function safeTransferFrom(address from,address to,uint256 tokenId,bytes calldata data)external;}
 interface IERC721Metadata{function name()external view returns(string memory);function symbol()external view returns(string memory);function tokenURI(uint256 tokenId)external view returns(string memory);}
-interface IOwlWarLand{function MINT(address _t,uint256 _a)external;} 
+interface IOwlWarLand{function MINT(address _t,uint256 _a)external;function BURN(address _t,uint256 _a)external;} 
 contract ERC721AC is IERC721,IERC721Metadata{
     address private _owner;
     mapping(uint256=>address)private _tokenApprovals;
@@ -129,7 +129,8 @@ contract ERC721AC is IERC721,IERC721Metadata{
         _mint(msg.sender,1,s,r);
     }}
     function BREED(uint256 p,uint256 q,uint256 s,string memory r)external payable{unchecked{
-        require(msg.value>=0.00 ether); /***[DEPLOYMENT SET TO 0.02]***/
+        //require(msg.value>=0.00 ether); /***[DEPLOYMENT SET TO 0.02]***/
+        
         bool existed;
         for(uint256 i=0;tokens[msg.sender].length>i;i++){
             if(((owl[tokens[msg.sender][i]].parent1==p&&owl[tokens[msg.sender][i]].parent2==q)||
@@ -143,6 +144,8 @@ contract ERC721AC is IERC721,IERC721Metadata{
             owl[p].owner==msg.sender&&owl[q].owner==msg.sender&& //must only owner of p and q
             (owl[p].sex==0&&owl[q].sex==1||owl[q].sex==0&&owl[p].sex==1)&& //must be different sex
             owl[p].time+0<block.timestamp&&owl[q].time+0<block.timestamp);//time [DEPLOYMENT 604800]
+
+        iOWL.BURN(msg.sender,30);
         _mint(msg.sender,owl[p].gen+1,s,r);
         owl[count].parent1=p;
         owl[count].parent2=q;
