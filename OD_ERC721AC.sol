@@ -19,6 +19,7 @@ contract OwlDefenseERC721AC is IERC721,IERC721Metadata{
         uint256 level;
     }
     uint256 private _count;
+    address private _owner;
     mapping(address=>bool)private _access;
     mapping(uint256=>mapping(uint256=>string))cidURI; //item,level,cid
     mapping(address=>Player)public player;
