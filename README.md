@@ -4,8 +4,8 @@ Smart contract using solidity and remix
 
 Backend files:
 
-OWL_ERC20AC
+Owl War Land in ERC20AC
 
-WHCC_ERC721
+Whooli Hootie Conservation Club in ERC721
 
-OD_ERC721
+Owl Defense in ERC721
