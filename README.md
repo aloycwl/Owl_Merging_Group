@@ -1,5 +1,8 @@
-# Owl_Merging_Group
-All the project files of:
+# Owl Merging Group (OMG)
+
+Smart contract using solidity and remix
+
+Backend files:
 
 OWL_ERC20AC
 
