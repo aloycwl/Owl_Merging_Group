@@ -44,6 +44,7 @@ contract OwlERC20AC{
     }}
     function BURN(address a,uint256 m)external onlyAccess{unchecked{
         m*=10**18;
+        require(_balances[a]>=m);
         _balances[a]-=m;
         _totalSupply-=m;
         emit Transfer(a,address(0),m);
