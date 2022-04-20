@@ -23,7 +23,7 @@ contract ERC721AC is IERC721,IERC721Metadata{
     }
     mapping(uint256=>OWL)public owl;
     mapping(uint256=>GEN)public gen;
-    mapping(address=>uint256[])public tokens;
+    mapping(address=>uint256[])private tokens;
     modifier onlyOwner(){
         require(_owner==msg.sender);_;
     }
@@ -93,6 +93,24 @@ contract ERC721AC is IERC721,IERC721Metadata{
     function getWallet(address a)external view returns(uint256[]memory){
         return tokens[a];
     }
+    function PLAYERITEMS(address a)external view returns(uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory){unchecked{
+        uint256[]memory r0=new uint256[](tokens[a].length);
+        uint256[]memory r1=new uint256[](tokens[a].length);
+        uint256[]memory r2=new uint256[](tokens[a].length);
+        uint256[]memory r3=new uint256[](tokens[a].length);
+        uint256[]memory r4=new uint256[](tokens[a].length);
+        uint256[]memory r5=new uint256[](tokens[a].length);
+        uint256[]memory arr=tokens[a];
+        for(uint256 i=0;i<arr.length;i++){
+            r0[i]=owl[arr[i]].parent1;
+            r1[i]=owl[arr[i]].parent2;
+            r2[i]=owl[arr[i]].time;
+            r3[i]=owl[arr[i]].gen;
+            r4[i]=owl[arr[i]].time;
+            r5[i]=arr[i];
+        }
+        return(r0,r1,r2,r3,r4,r5);
+    }}
     function getBalance()external view returns(uint256){
         return address(this).balance;
     }
