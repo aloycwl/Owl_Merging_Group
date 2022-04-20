@@ -129,8 +129,6 @@ contract ERC721AC is IERC721,IERC721Metadata{
         _mint(msg.sender,1,s,r);
     }}
     function BREED(uint256 p,uint256 q,uint256 s,string memory r)external payable{unchecked{
-        //require(msg.value>=0.00 ether); /***[DEPLOYMENT SET TO 0.02]***/
-        
         bool existed;
         for(uint256 i=0;tokens[msg.sender].length>i;i++){
             if(((owl[tokens[msg.sender][i]].parent1==p&&owl[tokens[msg.sender][i]].parent2==q)||
@@ -145,7 +143,7 @@ contract ERC721AC is IERC721,IERC721Metadata{
             (owl[p].sex==0&&owl[q].sex==1||owl[q].sex==0&&owl[p].sex==1)&& //must be different sex
             owl[p].time+0<block.timestamp&&owl[q].time+0<block.timestamp);//time [DEPLOYMENT 604800]
 
-        iOWL.BURN(msg.sender,30);
+        iOWL.BURN(msg.sender,30); //must have 30 OWL token
         _mint(msg.sender,owl[p].gen+1,s,r);
         owl[count].parent1=p;
         owl[count].parent2=q;
