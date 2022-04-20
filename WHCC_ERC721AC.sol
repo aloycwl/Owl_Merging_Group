@@ -90,9 +90,6 @@ contract ERC721AC is IERC721,IERC721Metadata{
         d=d;
         transferFrom(f,t,k);
     }
-    function getWallet(address a)external view returns(uint256[]memory){
-        return tokens[a];
-    }
     function PLAYERITEMS(address a)external view returns(uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory){unchecked{
         uint256[]memory r0=new uint256[](tokens[a].length);
         uint256[]memory r1=new uint256[](tokens[a].length);
@@ -106,7 +103,7 @@ contract ERC721AC is IERC721,IERC721Metadata{
             r1[i]=owl[arr[i]].parent2;
             r2[i]=owl[arr[i]].time;
             r3[i]=owl[arr[i]].gen;
-            r4[i]=owl[arr[i]].time;
+            r4[i]=owl[arr[i]].sex;
             r5[i]=arr[i];
         }
         return(r0,r1,r2,r3,r4,r5);
