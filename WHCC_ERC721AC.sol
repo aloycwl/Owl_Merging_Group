@@ -90,14 +90,15 @@ contract ERC721AC is IERC721,IERC721Metadata{
         d=d;
         transferFrom(f,t,k);
     }
-    function PLAYERITEMS(address a)external view returns(uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory){unchecked{
-        uint256[]memory r0=new uint256[](tokens[a].length);
-        uint256[]memory r1=new uint256[](tokens[a].length);
-        uint256[]memory r2=new uint256[](tokens[a].length);
-        uint256[]memory r3=new uint256[](tokens[a].length);
-        uint256[]memory r4=new uint256[](tokens[a].length);
-        uint256[]memory r5=new uint256[](tokens[a].length);
+    function PLAYERITEMS(address a)external view returns(uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory){unchecked{
         uint256[]memory arr=tokens[a];
+        uint256[]memory r0=new uint256[](arr.length);
+        uint256[]memory r1=new uint256[](arr.length);
+        uint256[]memory r2=new uint256[](arr.length);
+        uint256[]memory r3=new uint256[](arr.length);
+        uint256[]memory r4=new uint256[](arr.length);
+        uint256[]memory r5=new uint256[](arr.length);
+        uint256[]memory r6=new uint256[](arr.length);
         for(uint256 i=0;i<arr.length;i++){
             r0[i]=owl[arr[i]].parent1;
             r1[i]=owl[arr[i]].parent2;
@@ -105,8 +106,9 @@ contract ERC721AC is IERC721,IERC721Metadata{
             r3[i]=owl[arr[i]].gen;
             r4[i]=owl[arr[i]].sex;
             r5[i]=arr[i];
+            r6[i]=gen[owl[arr[i]].gen].currentCount<gen[owl[arr[i]].gen].maxCount?1:0;
         }
-        return(r0,r1,r2,r3,r4,r5);
+        return(r0,r1,r2,r3,r4,r5,r6);
     }}
     function getBalance()external view returns(uint256){
         return address(this).balance;
