@@ -122,8 +122,7 @@ contract ERC721AC is IERC721,IERC721Metadata{
     function GENPREP(uint256 k, uint256 m)external onlyOwner{
         gen[k].maxCount=m;
     }
-    function DEPOSIT()external payable{}
-    function DISTRIBUTE()external{unchecked{
+    function DISTRIBUTE()external payable{unchecked{
         bool s;
         (s,)=payable(payable(_owner)).call{value:address(this).balance/gen[1].currentCount<168?95:5*100}("");
         for(uint256 i=1;i<=count;i++){
