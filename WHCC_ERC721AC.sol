@@ -21,8 +21,8 @@ contract ERC721AC is IERC721,IERC721Metadata{
         uint256 maxCount;
         uint256 currentCount;
     }
-    mapping(uint256=>OWL)public owl;
     mapping(uint256=>GEN)public gen;
+    mapping(uint256=>OWL)private owl;
     mapping(address=>uint256[])private tokens;
     modifier onlyOwner(){
         require(_owner==msg.sender);_;
