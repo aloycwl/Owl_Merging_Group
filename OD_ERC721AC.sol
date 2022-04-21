@@ -6,11 +6,11 @@ contract ERC721AC is IERC721,IERC721Metadata{
     address private _owner;
     mapping(uint256=>address)private _tokenApprovals;
     struct Player{
-        mapping(uint256=>uint256[])item; //0-lumberjack 1-miner 2-farmer 3-factory 4-house 5-barrack 6-tower
+        mapping(uint256=>uint256[])item; //0-lumberjack 1-miner 2-farmer 3-blacksmith 4-refinery 5-barrack 6-tower
         uint256 wood;
         uint256 metal;
         uint256 food;
-        uint256 owl;
+        uint256 ingot;
         uint256 soldier;
         uint256 balance;
         uint256 lastClaimed;
@@ -143,19 +143,19 @@ contract ERC721AC is IERC721,IERC721Metadata{
                     counts=_getCount(player[a].item[3],3)*lapsedLoop/3;
                     minTriple*=lapsedLoop/3; //conversion to owl proportional to the number of factories
                     minTriple=minTriple<=counts?counts:minTriple;
-                    player[a].owl+=minTriple;
+                    player[a].ingot+=minTriple;
                     player[a].wood-=minTriple*3; //deduct only those converted resources
                     player[a].metal-=minTriple*3;
                     player[a].food-=minTriple*3;
                 }
                 counts=0;
                 minTriple=0;
-                if(player[a].owl>2&&player[a].item[4].length>0){ //have at least 3 owls and 1 house
+                if(player[a].ingot>2&&player[a].item[4].length>0){ //have at least 3 owls and 1 house
                     counts=_getCount(player[a].item[4],3)*lapsedLoop/3;
-                    minTriple=player[a].owl*lapsedLoop/3;
+                    minTriple=player[a].ingot*lapsedLoop/3;
                     minTriple=minTriple<=counts?counts:minTriple;
                     iOWL.MINT(msg.sender,10);
-                    player[a].owl-=minTriple*3;
+                    player[a].ingot-=minTriple*3;
                 }
                 player[a].soldier+=_getCount(player[a].item[5],1)*lapsedLoop;
             }
@@ -205,10 +205,10 @@ contract ERC721AC is IERC721,IERC721Metadata{
             if(_defense>=player[msg.sender].soldier)player[msg.sender].soldier=0;
             else{
                 player[msg.sender].soldier-=_defense;
-                uint256 counts=player[msg.sender].soldier>=player[a].owl?player[msg.sender].soldier:player[a].owl;
+                uint256 counts=player[msg.sender].soldier>=player[a].ingot?player[msg.sender].soldier:player[a].ingot;
                 player[msg.sender].soldier-=counts;
-                player[msg.sender].owl+=counts;
-                player[a].owl-=counts;
+                player[msg.sender].ingot+=counts;
+                player[a].ingot-=counts;
                 counts=player[msg.sender].soldier>=player[a].food?player[msg.sender].soldier:player[a].food;
                 if(counts>0){                
                     player[msg.sender].soldier-=counts;
