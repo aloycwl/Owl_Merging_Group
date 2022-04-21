@@ -32,38 +32,18 @@ contract ERC721AC is IERC721,IERC721Metadata{
         _owner=msg.sender;
         _access[msg.sender]=true;
     }
-    function supportsInterface(bytes4 f)external pure returns(bool){
-        return f==type(IERC721).interfaceId||f==type(IERC721Metadata).interfaceId;
-    }
-    function balanceOf(address o)external view override returns(uint256){
-        return player[o].balance;
-    }
-    function ownerOf(uint256 k)public view override returns(address){
-        return nft[k].owner;
-    }
-    function owner()external view returns(address){
-        return _owner;
-    }
+    function supportsInterface(bytes4 f)external pure returns(bool){return f==type(IERC721).interfaceId||f==type(IERC721Metadata).interfaceId;}
+    function balanceOf(address o)external view override returns(uint256){return player[o].balance;}
+    function ownerOf(uint256 k)public view override returns(address){return nft[k].owner;}
+    function owner()external view returns(address){return _owner;}
+    function approve(address t,uint256 k)external override{require(msg.sender==ownerOf(k)||isApprovedForAll(ownerOf(k),msg.sender));_tokenApprovals[k]=t;emit Approval(ownerOf(k),t,k);}
+    function getApproved(uint256 tokenId)public view override returns(address){return _tokenApprovals[tokenId];}
+    function setApprovalForAll(address p,bool a)external override{_operatorApprovals[msg.sender][p]=a;emit ApprovalForAll(msg.sender,p,a);}
+    function isApprovedForAll(address o,address p)public view override returns(bool){return _operatorApprovals[o][p];}
     function name()external pure override returns(string memory){return"Owl Defense";}
     function symbol()external pure override returns(string memory){return"OD";}
-    function tokenURI(uint256 _c)external view override returns(string memory){
-        return string(abi.encodePacked("ipfs://",cidURI[nft[_c].item][nft[_c].level]));
-    }
-    function approve(address t,uint256 k)external override{
-        require(msg.sender==ownerOf(k)||isApprovedForAll(ownerOf(k),msg.sender));
-        _tokenApprovals[k]=t;
-        emit Approval(ownerOf(k),t,k);
-    }
-    function getApproved(uint256 tokenId)public view override returns(address){
-        return _tokenApprovals[tokenId];
-    }
-    function setApprovalForAll(address p,bool a)external override{
-        _operatorApprovals[msg.sender][p]=a;
-        emit ApprovalForAll(msg.sender,p,a);
-    }
-    function isApprovedForAll(address o,address p)public view override returns(bool){
-        return _operatorApprovals[o][p];
-    }
+    function safeTransferFrom(address f,address t,uint256 k)external override{transferFrom(f,t,k);}
+    function safeTransferFrom(address f,address t,uint256 k,bytes memory d)external override{d=d;transferFrom(f,t,k);}
     function transferFrom(address f,address t,uint256 k)public override{unchecked{
         require(f==ownerOf(k)||getApproved(k)==f||isApprovedForAll(ownerOf(k),f));
         _tokenApprovals[k]=address(0);
@@ -86,12 +66,19 @@ contract ERC721AC is IERC721,IERC721Metadata{
 
 
     }}
-    function safeTransferFrom(address f,address t,uint256 k)external override{
-        transferFrom(f,t,k);
+    function setURI(uint256 _i,uint256 _l,string memory _c)external onlyAccess{
+        cidURI[_i][_l]=_c;
     }
-    function safeTransferFrom(address f,address t,uint256 k,bytes memory d)external override{
-        d=d;
-        transferFrom(f,t,k);
+    function _getCount(uint256[]memory _i,uint256 _m)private view returns(uint256){unchecked{
+        uint256 _c;
+        for(uint256 i=0;i<_i.length;i++)_c+=_m*3**(nft[_i[i]].level-1)*(80+nft[_i[i]].level*20)/100;
+        return _c;
+    }}
+    function TokenAddress(address a)external onlyAccess{
+        iOWL=IOwlWarLand(a);
+    }
+    function tokenURI(uint256 k)external view override returns(string memory){
+        return string(abi.encodePacked("ipfs://",cidURI[nft[k].item][nft[k].level]));
     }
     function MINT(uint256 _i)external payable{unchecked{
         require(msg.value>=0/*.05 DEVELOPMENT UNCOMMENT THIS*/ ether);
@@ -105,17 +92,6 @@ contract ERC721AC is IERC721,IERC721Metadata{
         autoMerge(_i,1,msg.sender);
         CLAIM(msg.sender);
     }}
-    function setURI(uint256 _i,uint256 _l,string memory _c)external onlyAccess{
-        cidURI[_i][_l]=_c;
-    }
-    function _getCount(uint256[]memory _i,uint256 _m)private view returns(uint256){unchecked{
-        uint256 _c;
-        for(uint256 i=0;i<_i.length;i++)_c+=_m*3**(nft[_i[i]].level-1)*(80+nft[_i[i]].level*20)/100;
-        return _c;
-    }}
-    function TokenAddress(address a)external onlyAccess{
-        iOWL=IOwlWarLand(a);
-    }
     function PLAYERITEMS(address a)external view returns(uint256[]memory,uint256[]memory){unchecked{
         uint256[]memory _items=new uint256[](player[a].balance);
         uint256[]memory _levels=new uint256[](player[a].balance);
