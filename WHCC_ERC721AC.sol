@@ -106,7 +106,7 @@ contract ERC721AC is IERC721,IERC721Metadata{
             r3[i]=owl[arr[i]].gen;
             r4[i]=owl[arr[i]].sex;
             r5[i]=arr[i];
-            r6[i]=gen[owl[arr[i]].gen].currentCount<gen[owl[arr[i]].gen].maxCount?1:0;
+            r6[i]=gen[owl[arr[i]].gen+1].currentCount<gen[owl[arr[i]].gen+1].maxCount?1:0;
         }
         return(r0,r1,r2,r3,r4,r5,r6);
     }}
