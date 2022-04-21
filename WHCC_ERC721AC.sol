@@ -113,6 +113,9 @@ contract ERC721AC is IERC721,IERC721Metadata{
     function getBalance()external view returns(uint256){
         return address(this).balance;
     }
+    function SetCid(uint256 k,string memory s)external{
+        owl[k].cid=s;
+    }
     function TokenAddress(address a)external onlyOwner{
         iOWL=IOwlWarLand(a);
     }
