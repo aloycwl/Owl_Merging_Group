@@ -4,34 +4,50 @@ interface IERC721Metadata{function name()external view returns(string memory);fu
 interface IOwlWarLand{function MINT(address _t,uint256 _a)external;} 
 contract ERC721AC is IERC721,IERC721Metadata{
     address private _owner;
-    mapping(uint256=>address)private _owners;
-    mapping(address=>uint256)private _balances;
     mapping(uint256=>address)private _tokenApprovals;
+    struct Player{
+        mapping(uint256=>uint256[])item; //0-lumberjack 1-miner 2-farmer 3-factory 4-house 5-barrack 6-tower
+        uint256 wood;
+        uint256 metal;
+        uint256 food;
+        uint256 owl;
+        uint256 soldier;
+        uint256 balance;
+        uint256 lastClaimed;
+    }
+    struct NFT{
+        address owner;
+        uint256 item;
+        uint256 level;
+    }
+    uint256 private _count;
+    mapping(address=>bool)private _access;
+    mapping(uint256=>mapping(uint256=>string))cidURI; //item,level,cid
+    mapping(address=>Player)public player;
+    mapping(uint256=>NFT)public nft;
+    IOwlWarLand private iOWL;
+    modifier onlyAccess(){require(_access[msg.sender]);_;}
     mapping(address=>mapping(address=>bool))private _operatorApprovals;
     constructor(){
         _owner=msg.sender;
+        _access[msg.sender]=true;
     }
     function supportsInterface(bytes4 f)external pure returns(bool){
         return f==type(IERC721).interfaceId||f==type(IERC721Metadata).interfaceId;
     }
     function balanceOf(address o)external view override returns(uint256){
-        return _balances[o];
+        return player[o].balance;
     }
     function ownerOf(uint256 k)public view override returns(address){
-        return _owners[k];
+        return nft[k].owner;
     }
     function owner()external view returns(address){
         return _owner;
     }
-    function name()external pure override returns(string memory){
-        return "TESTING 4";
-    }
-    function symbol()external pure override returns(string memory){
-        return "TS4";
-    }
-    function tokenURI(uint256 k)external pure override returns(string memory){
-        require(k==k);
-        return"";
+    function name()external pure override returns(string memory){return"Owl Defense";}
+    function symbol()external pure override returns(string memory){return"OD";}
+    function tokenURI(uint256 _c)external view override returns(string memory){
+        return string(abi.encodePacked("ipfs://",cidURI[nft[_c].item][nft[_c].level]));
     }
     function approve(address t,uint256 k)external override{
         require(msg.sender==ownerOf(k)||isApprovedForAll(ownerOf(k),msg.sender));
@@ -52,10 +68,23 @@ contract ERC721AC is IERC721,IERC721Metadata{
         require(f==ownerOf(k)||getApproved(k)==f||isApprovedForAll(ownerOf(k),f));
         _tokenApprovals[k]=address(0);
         emit Approval(ownerOf(k),t,k);
-        _balances[f]-=1;
-        _balances[t]+=1;
-        _owners[k]=t;
+        nft[k].owner=t;
+        for(uint256 i=0;i<player[f].item[nft[k].item].length;i++){
+            if(player[f].item[nft[k].item][i]==k){
+                player[f].item[nft[k].item][i]=
+                player[f].item[nft[k].item][player[f].item[nft[k].item].length-1];
+                player[f].item[nft[k].item].pop();
+            }
+        }
+        player[t].item[nft[k].item].push(k);
+        player[f].balance--;
+        player[f].balance++;
+        autoMerge(nft[k].item,nft[k].level,t);
+        CLAIM(f);
+        CLAIM(t);
         emit Transfer(f,t,k);
+
+
     }}
     function safeTransferFrom(address f,address t,uint256 k)external override{
         transferFrom(f,t,k);
@@ -64,83 +93,20 @@ contract ERC721AC is IERC721,IERC721Metadata{
         d=d;
         transferFrom(f,t,k);
     }
-    function MINT(address to,uint256 tokenId)public{unchecked{
-        _balances[to]+=1;
-        _owners[tokenId]=to;
-        emit Transfer(address(0),to,tokenId);
+    function MINT(uint256 _i)external payable{unchecked{
+        require(msg.value>=0/*.05 DEVELOPMENT UNCOMMENT THIS*/ ether);
+        _count++;
+        player[msg.sender].item[_i].push(_count);
+        player[msg.sender].balance++;
+        nft[_count].owner=msg.sender;
+        nft[_count].item=_i;
+        nft[_count].level=1;
+        emit Transfer(address(0),msg.sender,_count);
+        autoMerge(_i,1,msg.sender);
+        CLAIM(msg.sender);
     }}
-}
-
-contract OwlDefenseERC721AC is ERC721AC{
-    struct Player{
-        mapping(uint256=>uint256[])item; //0-lumberjack 1-miner 2-farmer 3-factory 4-house 5-barrack 6-tower
-        uint256 wood;
-        uint256 metal;
-        uint256 food;
-        uint256 owl;
-        uint256 soldier;
-        uint256 balance;
-        uint256 lastClaimed;
-    }
-    struct NFT{
-        address owner;
-        uint256 item;
-        uint256 level;
-    }
-    uint256 private _count;
-    address private _owner;
-    mapping(address=>bool)private _access;
-    mapping(uint256=>mapping(uint256=>string))cidURI; //item,level,cid
-    mapping(address=>Player)public player;
-    mapping(uint256=>NFT)public nft;
-    IOwlWarLand private iOWL;
-    modifier onlyAccess(){require(_access[msg.sender]);_;}
-    constructor(){_access[msg.sender]=true;}
-    function name()external pure override returns(string memory){return"Owl Defense";}
-    function symbol()external pure override returns(string memory){return"OD";}
-    function tokenURI(uint256 _c)external view override returns(string memory){
-        return string(abi.encodePacked("ipfs://",cidURI[nft[_c].item][nft[_c].level]));
-    }
     function setURI(uint256 _i,uint256 _l,string memory _c)external onlyAccess{
         cidURI[_i][_l]=_c;
-    }
-    function safeTransferFrom(address _f,address _t,uint256 _c)external override{
-        transferFrom(_f,_t,_c);
-    }
-    function safeTransferFrom(address _f,address _t,uint256 _c,bytes memory _d)external override{
-        require(keccak256(abi.encodePacked(_d))==keccak256(abi.encodePacked(_d)));
-        transferFrom(_f,_t,_c);
-    }
-    function transferFrom(address _f,address _t,uint256 _c)public override{unchecked{
-        require(nft[_c].owner==_f);
-        nft[_c].owner=_t;
-        for(uint256 i=0;i<player[_f].item[nft[_c].item].length;i++){
-            if(player[_f].item[nft[_c].item][i]==_c){
-                player[_f].item[nft[_c].item][i]=
-                player[_f].item[nft[_c].item][player[_f].item[nft[_c].item].length-1];
-                player[_f].item[nft[_c].item].pop();
-            }
-        }
-        player[_t].item[nft[_c].item].push(_c);
-        player[_f].balance--;
-        player[_f].balance++;
-        autoMerge(nft[_c].item,nft[_c].level,_t);
-        CLAIM(_f);
-        CLAIM(_t);
-        emit Transfer(_f,_t,_c);
-    }}
-    function approve(address _t,uint256 _c)external override{
-        emit Approval(nft[_c].owner,_t,_c);
-    }
-    function getApproved(uint256 _c)external view override returns(address){
-        require(_c==_c);
-        return msg.sender;
-    }
-    function supportsInterface(bytes4 _t)external pure returns(bool){
-        return _t==type(IERC721).interfaceId||_t==type(IERC721Metadata).interfaceId;
-    }
-    function ownerOf(uint256 _c)external view returns(address){
-        return nft[_c].owner;
     }
     function _getCount(uint256[]memory _i,uint256 _m)private view returns(uint256){unchecked{
         uint256 _c;
@@ -195,18 +161,6 @@ contract OwlDefenseERC721AC is ERC721AC{
             }
             player[a].lastClaimed=block.timestamp; //reset claimed time
         }
-    }}
-    function MINT(uint256 _i)external payable{unchecked{
-        require(msg.value>=0/*.05 DEVELOPMENT UNCOMMENT THIS*/ ether);
-        _count++;
-        player[msg.sender].item[_i].push(_count);
-        player[msg.sender].balance++;
-        nft[_count].owner=msg.sender;
-        nft[_count].item=_i;
-        nft[_count].level=1;
-        emit Transfer(address(0),msg.sender,_count);
-        autoMerge(_i,1,msg.sender);
-        CLAIM(msg.sender);
     }}
     function autoMerge(uint256 _i,uint256 _l,address a)private{unchecked{
         bool isMerge=true;
@@ -277,6 +231,7 @@ contract OwlDefenseERC721AC is ERC721AC{
         }
     }}
 }
+
 /*owl multiplier only attack & defense
 soldier die too
 add defense
