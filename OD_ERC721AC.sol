@@ -66,13 +66,13 @@ contract ERC721AC is IERC721,IERC721Metadata{
 
 
     }}
-    function setURI(uint256 _i,uint256 _l,string memory _c)external onlyAccess{
-        cidURI[_i][_l]=_c;
+    function setURI(uint256 t,uint256 l,string memory c)external onlyAccess{
+        cidURI[t][l]=c;
     }
-    function _getCount(uint256[]memory _i,uint256 _m)private view returns(uint256){unchecked{
-        uint256 _c;
-        for(uint256 i=0;i<_i.length;i++)_c+=_m*3**(nft[_i[i]].level-1)*(80+nft[_i[i]].level*20)/100;
-        return _c;
+    function _getCount(uint256[]memory k,uint256 m)private view returns(uint256){unchecked{
+        uint256 c;
+        for(uint256 i=0;i<k.length;i++)c+=m*3**(nft[k[i]].level-1)*(80+nft[k[i]].level*20)/100;
+        return c;
     }}
     function TokenAddress(address a)external onlyAccess{
         iOWL=IOwlWarLand(a);
