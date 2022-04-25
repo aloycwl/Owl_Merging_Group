@@ -1,4 +1,4 @@
-pragma solidity^0.8.13;//SPDX-License-Identifier:MIT
+pragma solidity^0.8.13;//SPDX-License-Identifier:None
 interface IERC721{event Transfer(address indexed from,address indexed to,uint256 indexed tokenId);event Approval(address indexed owner,address indexed approved,uint256 indexed tokenId);event ApprovalForAll(address indexed owner,address indexed operator,bool approved);function balanceOf(address owner)external view returns(uint256 balance);function ownerOf(uint256 tokenId)external view returns(address owner);function safeTransferFrom(address from,address to,uint256 tokenId)external;function transferFrom(address from,address to,uint256 tokenId)external;function approve(address to,uint256 tokenId)external;function getApproved(uint256 tokenId)external view returns(address operator);function setApprovalForAll(address operator,bool _approved)external;function isApprovedForAll(address owner,address operator)external view returns(bool);function safeTransferFrom(address from,address to,uint256 tokenId,bytes calldata data)external;}
 interface IERC721Metadata{function name()external view returns(string memory);function symbol()external view returns(string memory);function tokenURI(uint256 tokenId)external view returns(string memory);}
 interface IOwlWarLand{function MINT(address _t,uint256 _a)external;} 
@@ -51,8 +51,7 @@ contract ERC721AC is IERC721,IERC721Metadata{
         nft[k].owner=t;
         for(uint256 i=0;i<player[f].item[nft[k].item].length;i++){
             if(player[f].item[nft[k].item][i]==k){
-                player[f].item[nft[k].item][i]=
-                player[f].item[nft[k].item][player[f].item[nft[k].item].length-1];
+                player[f].item[nft[k].item][i]=player[f].item[nft[k].item][player[f].item[nft[k].item].length-1];
                 player[f].item[nft[k].item].pop();
             }
         }
@@ -63,17 +62,10 @@ contract ERC721AC is IERC721,IERC721Metadata{
         CLAIM(f);
         CLAIM(t);
         emit Transfer(f,t,k);
-
-
     }}
     function setURI(uint256 t,uint256 l,string memory c)external onlyAccess{
         cidURI[t][l]=c;
     }
-    function _getCount(uint256[]memory k,uint256 m)private view returns(uint256){unchecked{
-        uint256 c;
-        for(uint256 i=0;i<k.length;i++)c+=m*3**(nft[k[i]].level-1)*(80+nft[k[i]].level*20)/100;
-        return c;
-    }}
     function TokenAddress(address a)external onlyAccess{
         iOWL=IOwlWarLand(a);
     }
@@ -105,38 +97,43 @@ contract ERC721AC is IERC721,IERC721Metadata{
     }}
     function CLAIM(address a)public{unchecked{
         uint256 _lc=player[a].lastClaimed;
-        uint256 lapsedLoop=(block.timestamp-_lc)/60; //criteria for new and claimable player, 6 hours
+        uint256 lapsedLoop=(block.timestamp-_lc)/10; //criteria for new and claimable player, 6 hours
         if(lapsedLoop>0){ 
             if(_lc>0){ //only claim when not a new player
                 player[a].wood+=_getCount(player[a].item[0],3)*lapsedLoop;
                 player[a].metal+=_getCount(player[a].item[1],3)*lapsedLoop;
                 player[a].food+=_getCount(player[a].item[2],3)*lapsedLoop;
                 uint256 counts;
-                uint256 minTriple=player[a].wood<=player[a].metal? //check which one has the least quantity
-                    player[a].wood<=player[a].food?player[a].wood:player[a].food:
-                    player[a].metal<=player[a].food?player[a].metal:player[a].food;
+                uint256 minTriple=player[a].wood<player[a].metal? //check which one has the least quantity
+                    player[a].wood<player[a].food?player[a].wood:player[a].food:
+                    player[a].metal<player[a].food?player[a].metal:player[a].food;
                 if(minTriple>2&&player[a].item[3].length>0){ //have at least 3 resource each and 1 factory
                     counts=_getCount(player[a].item[3],3)*lapsedLoop/3;
-                    minTriple*=lapsedLoop/3; //conversion to owl proportional to the number of factories
+                    minTriple=lapsedLoop/3; //conversion to ingot proportional to the number of factories
                     minTriple=minTriple<=counts?counts:minTriple;
                     player[a].ingot+=minTriple;
-                    player[a].wood-=minTriple*3; //deduct only those converted resources
-                    player[a].metal-=minTriple*3;
-                    player[a].food-=minTriple*3;
+                    player[a].wood=player[a].wood-minTriple*3; //deduct only those converted resources
+                    player[a].metal=player[a].metal-minTriple*3;
+                    player[a].food=player[a].food-minTriple*3;
                 }
                 counts=0;
                 minTriple=0;
-                if(player[a].ingot>2&&player[a].item[4].length>0){ //have at least 3 owls and 1 house
+                if(player[a].ingot>2&&player[a].item[4].length>0){ //have at least 3 ingot and 1 refinery
                     counts=_getCount(player[a].item[4],3)*lapsedLoop/3;
                     minTriple=player[a].ingot*lapsedLoop/3;
                     minTriple=minTriple<=counts?counts:minTriple;
                     iOWL.MINT(msg.sender,10);
-                    player[a].ingot-=minTriple*3;
+                    player[a].ingot=player[a].ingot-minTriple*3;
                 }
                 player[a].soldier+=_getCount(player[a].item[5],1)*lapsedLoop;
             }
             player[a].lastClaimed=block.timestamp; //reset claimed time
         }
+    }}
+    function _getCount(uint256[]memory k,uint256 m)private view returns(uint256){unchecked{
+        uint256 c;
+        for(uint256 i=0;i<k.length;i++)c+=m*3**(nft[k[i]].level-1)*(80+nft[k[i]].level*20)/100;
+        return c;
     }}
     function autoMerge(uint256 _i,uint256 _l,address a)private{unchecked{
         bool isMerge=true;
