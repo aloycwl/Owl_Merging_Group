@@ -97,8 +97,8 @@ contract ERC721AC is IERC721,IERC721Metadata{
     }}
     function CLAIM(address a)public{unchecked{
         uint256 _lc=player[a].lastClaimed;
-        uint256 lapsedLoop=(block.timestamp-_lc)/10; //criteria for new and claimable player, 6 hours
-        if(lapsedLoop>0){ 
+        uint256 lapsedLoop=(block.timestamp-_lc)/10; //604800 criteria for new and claimable player, 6 hours
+        if(lapsedLoop>0){
             if(_lc>0){ //only claim when not a new player
                 player[a].wood+=_getCount(player[a].item[0],3)*lapsedLoop;
                 player[a].metal+=_getCount(player[a].item[1],3)*lapsedLoop;
