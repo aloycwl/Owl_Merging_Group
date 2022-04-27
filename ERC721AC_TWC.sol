@@ -1,7 +1,7 @@
 pragma solidity^0.8.13;//SPDX-License-Identifier:None
 interface IERC721{event Transfer(address indexed from,address indexed to,uint256 indexed tokenId);event Approval(address indexed owner,address indexed approved,uint256 indexed tokenId);event ApprovalForAll(address indexed owner,address indexed operator,bool approved);function balanceOf(address owner)external view returns(uint256 balance);function ownerOf(uint256 tokenId)external view returns(address owner);function safeTransferFrom(address from,address to,uint256 tokenId)external;function transferFrom(address from,address to,uint256 tokenId)external;function approve(address to,uint256 tokenId)external;function getApproved(uint256 tokenId)external view returns(address operator);function setApprovalForAll(address operator,bool _approved)external;function isApprovedForAll(address owner,address operator)external view returns(bool);function safeTransferFrom(address from,address to,uint256 tokenId,bytes calldata data)external;}
 interface IERC721Metadata{function name()external view returns(string memory);function symbol()external view returns(string memory);function tokenURI(uint256 tokenId)external view returns(string memory);}
-interface IOwlWarLand{function BURN(address _t,uint256 _a)external;}
+interface IPOT{function BURN(address _t,uint256 _a)external;}
 contract ERC721AC_TheWooClub is IERC721,IERC721Metadata{
     uint256 public count;
     address private _owner;
@@ -10,7 +10,7 @@ contract ERC721AC_TheWooClub is IERC721,IERC721Metadata{
     mapping(address=>uint256[])private tokens;
     mapping(uint256=>address)private _tokenApprovals;
     mapping(address=>mapping(address=>bool))private _operatorApprovals;
-    IOwlWarLand private iOWL;
+    IPOT private ipot;
     struct OWL{
         address owner;
         uint256 parent1;
@@ -87,7 +87,7 @@ contract ERC721AC_TheWooClub is IERC721,IERC721Metadata{
         owl[k].cid=s;
     }
     function TokenAddress(address a)external onlyOwner{
-        iOWL=IOwlWarLand(a);
+        ipot=IPOT(a);
     }
     function GENPREP(uint256 k, uint256 m)external onlyOwner{
         gen[k].maxCount=m;
@@ -132,7 +132,7 @@ contract ERC721AC_TheWooClub is IERC721,IERC721Metadata{
             owl[p].owner==msg.sender&&owl[q].owner==msg.sender&& //must only owner of p and q
             (owl[p].sex==0&&owl[q].sex==1||owl[q].sex==0&&owl[p].sex==1)&& //must be different sex
             owl[p].time+0<block.timestamp&&owl[q].time+0/*7*/ days<block.timestamp);//time
-        iOWL.BURN(msg.sender,/*3*/0); //must have 30 OWL token
+        ipot.BURN(msg.sender,/*3*/0); //must have 30 OWL token
         _mint(msg.sender,owl[p].gen+1,s,r);
         owl[count].parent1=p;
         owl[count].parent2=q;
