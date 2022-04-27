@@ -25,7 +25,7 @@ contract OwlERC20AC{
         return true;
     }
     function transferFrom(address from,address to,uint256 amount)public returns(bool){unchecked{
-        amount*=10**18;
+        amount*=1e18;
         require(_balances[from]>=amount);
         _balances[from]-=amount;
         _balances[to]+=amount;
@@ -37,13 +37,13 @@ contract OwlERC20AC{
         else _access[a]=true;
     }
     function MINT(address a,uint256 m)external onlyAccess{unchecked{
-        m*=10**18;
+        m*=1e18;
         _totalSupply+=m;
         _balances[a]+=m;
         emit Transfer(address(0),a,m);
     }}
     function BURN(address a,uint256 m)external onlyAccess{unchecked{
-        m*=10**18;
+        m*=1e18;
         require(_balances[a]>=m);
         _balances[a]-=m;
         _totalSupply-=m;
