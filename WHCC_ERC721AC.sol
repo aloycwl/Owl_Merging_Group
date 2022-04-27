@@ -90,15 +90,15 @@ contract ERC721AC is IERC721,IERC721Metadata{
         d=d;
         transferFrom(f,t,k);
     }
-    function PLAYERITEMS(address a)external view returns(uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory,uint256[]memory){unchecked{
+    function PLAYERITEMS(address a)external view returns(uint256[]memory r0,uint256[]memory r1,uint256[]memory r2,uint256[]memory r3,uint256[]memory r4,uint256[]memory r5,uint256[]memory r6){unchecked{
         uint256[]memory arr=tokens[a];
-        uint256[]memory r0=new uint256[](arr.length);
-        uint256[]memory r1=new uint256[](arr.length);
-        uint256[]memory r2=new uint256[](arr.length);
-        uint256[]memory r3=new uint256[](arr.length);
-        uint256[]memory r4=new uint256[](arr.length);
-        uint256[]memory r5=new uint256[](arr.length);
-        uint256[]memory r6=new uint256[](arr.length);
+        r0=new uint256[](arr.length);
+        r1=new uint256[](arr.length);
+        r2=new uint256[](arr.length);
+        r3=new uint256[](arr.length);
+        r4=new uint256[](arr.length);
+        r5=new uint256[](arr.length);
+        r6=new uint256[](arr.length);
         for(uint256 i=0;i<arr.length;i++){
             r0[i]=owl[arr[i]].parent1;
             r1[i]=owl[arr[i]].parent2;
@@ -161,8 +161,7 @@ contract ERC721AC is IERC721,IERC721Metadata{
             owl[p].gen==owl[q].gen&& //must be same gen
             owl[p].owner==msg.sender&&owl[q].owner==msg.sender&& //must only owner of p and q
             (owl[p].sex==0&&owl[q].sex==1||owl[q].sex==0&&owl[p].sex==1)&& //must be different sex
-            owl[p].time+0<block.timestamp&&owl[q].time+0<block.timestamp);//time [DEPLOYMENT 604800]
-
+            owl[p].time+0<block.timestamp&&owl[q].time+0 days<block.timestamp);//time [DEPLOYMENT 7 days]
         iOWL.BURN(msg.sender,30); //must have 30 OWL token
         _mint(msg.sender,owl[p].gen+1,s,r);
         owl[count].parent1=p;
