@@ -1,17 +1,17 @@
 pragma solidity^0.8.13;//SPDX-License-Identifier:None
 interface IERC721{event Transfer(address indexed from,address indexed to,uint256 indexed tokenId);event Approval(address indexed owner,address indexed approved,uint256 indexed tokenId);event ApprovalForAll(address indexed owner,address indexed operator,bool approved);function balanceOf(address owner)external view returns(uint256 balance);function ownerOf(uint256 tokenId)external view returns(address owner);function safeTransferFrom(address from,address to,uint256 tokenId)external;function transferFrom(address from,address to,uint256 tokenId)external;function approve(address to,uint256 tokenId)external;function getApproved(uint256 tokenId)external view returns(address operator);function setApprovalForAll(address operator,bool _approved)external;function isApprovedForAll(address owner,address operator)external view returns(bool);function safeTransferFrom(address from,address to,uint256 tokenId,bytes calldata data)external;}
 interface IERC721Metadata{function name()external view returns(string memory);function symbol()external view returns(string memory);function tokenURI(uint256 tokenId)external view returns(string memory);}
-interface IOwlWarLand{function MINT(address _t,uint256 _a)external;} 
+interface IPOT{function MINT(address _t,uint256 _a)external;} 
 contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
     address private _owner;
     mapping(uint256=>address)private _tokenApprovals;
     struct Player{
-        mapping(uint256=>uint256[])item; //0-lumberjack 1-miner 2-farmer 3-blacksmith 4-refinery 5-barrack 6-tower
-        uint256 wood;
-        uint256 metal;
-        uint256 food;
-        uint256 ingot;
-        uint256 soldier;
+        mapping(uint256=>uint256[])item; //0-sun 1-ocean 2-earth 3-plantation 4-cafe 5-swamp 6-fumigation
+        uint256 light;
+        uint256 water;
+        uint256 soil;
+        uint256 tealeaf;
+        uint256 teamosquito;
         uint256 balance;
         uint256 lastClaimed;
     }
@@ -25,7 +25,7 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
     mapping(uint256=>mapping(uint256=>string))cidURI; //item,level,cid
     mapping(address=>Player)public player;
     mapping(uint256=>NFT)public nft;
-    IOwlWarLand private iOWL;
+    IPOT private ipot;
     modifier onlyAccess(){require(_access[msg.sender]);_;}
     mapping(address=>mapping(address=>bool))private _operatorApprovals;
     constructor(){
@@ -67,7 +67,7 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
         cidURI[t][l]=c;
     }
     function TokenAddress(address a)external onlyAccess{
-        iOWL=IOwlWarLand(a);
+        ipot=IPOT(a);
     }
     function tokenURI(uint256 k)external view override returns(string memory){
         return string(abi.encodePacked("ipfs://",cidURI[nft[k].item][nft[k].level]));
@@ -100,32 +100,32 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
         uint256 lapsedLoop=(block.timestamp-_lc)/10; //604800 criteria for new and claimable player, 6 hours
         if(lapsedLoop>0){
             if(_lc>0){ //only claim when not a new player
-                player[a].wood+=_getCount(player[a].item[0],3)*lapsedLoop;
-                player[a].metal+=_getCount(player[a].item[1],3)*lapsedLoop;
-                player[a].food+=_getCount(player[a].item[2],3)*lapsedLoop;
+                player[a].light+=_getCount(player[a].item[0],3)*lapsedLoop;
+                player[a].water+=_getCount(player[a].item[1],3)*lapsedLoop;
+                player[a].soil+=_getCount(player[a].item[2],3)*lapsedLoop;
                 uint256 counts;
-                uint256 minTriple=player[a].wood<player[a].metal? //check which one has the least quantity
-                    player[a].wood<player[a].food?player[a].wood:player[a].food:
-                    player[a].metal<player[a].food?player[a].metal:player[a].food;
+                uint256 minTriple=player[a].light<player[a].water? //check which one has the least quantity
+                    player[a].light<player[a].soil?player[a].light:player[a].soil:
+                    player[a].water<player[a].soil?player[a].water:player[a].soil;
                 if(minTriple>2&&player[a].item[3].length>0){ //have at least 3 resource each and 1 factory
                     counts=_getCount(player[a].item[3],3)*lapsedLoop/3;
-                    minTriple=lapsedLoop/3; //conversion to ingot proportional to the number of factories
+                    minTriple=lapsedLoop/3; //conversion to tealeaf proportional to the number of factories
                     minTriple=minTriple<=counts?counts:minTriple;
-                    player[a].ingot+=minTriple;
-                    player[a].wood=player[a].wood-minTriple*3; //deduct only those converted resources
-                    player[a].metal=player[a].metal-minTriple*3;
-                    player[a].food=player[a].food-minTriple*3;
+                    player[a].tealeaf+=minTriple;
+                    player[a].light=player[a].light-minTriple*3; //deduct only those converted resources
+                    player[a].water=player[a].water-minTriple*3;
+                    player[a].soil=player[a].soil-minTriple*3;
                 }
                 counts=0;
                 minTriple=0;
-                if(player[a].ingot>2&&player[a].item[4].length>0){ //have at least 3 ingot and 1 refinery
+                if(player[a].tealeaf>2&&player[a].item[4].length>0){ //have at least 3 tealeaf and 1 refinery
                     counts=_getCount(player[a].item[4],3)*lapsedLoop/3;
-                    minTriple=player[a].ingot*lapsedLoop/3;
+                    minTriple=player[a].tealeaf*lapsedLoop/3;
                     minTriple=minTriple<=counts?counts:minTriple;
-                    iOWL.MINT(msg.sender,10);
-                    player[a].ingot=player[a].ingot-minTriple*3;
+                    ipot.MINT(msg.sender,10);
+                    player[a].tealeaf=player[a].tealeaf-minTriple*3;
                 }
-                player[a].soldier+=_getCount(player[a].item[5],1)*lapsedLoop;
+                player[a].teamosquito+=_getCount(player[a].item[5],1)*lapsedLoop;
             }
             player[a].lastClaimed=block.timestamp; //reset claimed time
         }
@@ -173,29 +173,29 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
     function ATTACK(address a)external{unchecked{
         CLAIM(a);
         uint256 _defense=_getCount(player[a].item[5],2);
-        if(player[msg.sender].soldier>0){ //only attack when there is soldier
-            if(_defense>=player[msg.sender].soldier)player[msg.sender].soldier=0;
+        if(player[msg.sender].teamosquito>0){ //only attack when there is teamosquito
+            if(_defense>=player[msg.sender].teamosquito)player[msg.sender].teamosquito=0;
             else{
-                player[msg.sender].soldier-=_defense;
-                uint256 counts=player[msg.sender].soldier>=player[a].ingot?player[msg.sender].soldier:player[a].ingot;
-                player[msg.sender].soldier-=counts;
-                player[msg.sender].ingot+=counts;
-                player[a].ingot-=counts;
-                counts=player[msg.sender].soldier>=player[a].food?player[msg.sender].soldier:player[a].food;
+                player[msg.sender].teamosquito-=_defense;
+                uint256 counts=player[msg.sender].teamosquito>=player[a].tealeaf?player[msg.sender].teamosquito:player[a].tealeaf;
+                player[msg.sender].teamosquito-=counts;
+                player[msg.sender].tealeaf+=counts;
+                player[a].tealeaf-=counts;
+                counts=player[msg.sender].teamosquito>=player[a].soil?player[msg.sender].teamosquito:player[a].soil;
                 if(counts>0){                
-                    player[msg.sender].soldier-=counts;
-                    player[msg.sender].food+=counts;
-                    player[a].food-=counts;
-                    counts=player[msg.sender].soldier>=player[a].metal?player[msg.sender].soldier:player[a].metal;
+                    player[msg.sender].teamosquito-=counts;
+                    player[msg.sender].soil+=counts;
+                    player[a].soil-=counts;
+                    counts=player[msg.sender].teamosquito>=player[a].water?player[msg.sender].teamosquito:player[a].water;
                     if(counts>0){                
-                        player[msg.sender].soldier-=counts;
-                        player[msg.sender].metal+=counts;
-                        player[a].metal-=counts;
-                        counts=player[msg.sender].soldier>=player[a].wood?player[msg.sender].soldier:player[a].wood;
+                        player[msg.sender].teamosquito-=counts;
+                        player[msg.sender].water+=counts;
+                        player[a].water-=counts;
+                        counts=player[msg.sender].teamosquito>=player[a].light?player[msg.sender].teamosquito:player[a].light;
                         if(counts>0){                
-                            player[msg.sender].soldier-=counts;
-                            player[msg.sender].wood+=counts;
-                            player[a].wood-=counts;
+                            player[msg.sender].teamosquito-=counts;
+                            player[msg.sender].light+=counts;
+                            player[a].light-=counts;
                         }
                     }
                 }
@@ -205,7 +205,7 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
 }
 
 /*owl multiplier only attack & defense
-soldier die too
+teamosquito die too
 add defense
 clan features
 */
