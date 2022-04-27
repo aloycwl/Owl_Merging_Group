@@ -3,10 +3,13 @@ interface IERC721{event Transfer(address indexed from,address indexed to,uint256
 interface IERC721Metadata{function name()external view returns(string memory);function symbol()external view returns(string memory);function tokenURI(uint256 tokenId)external view returns(string memory);}
 interface IOwlWarLand{function BURN(address _t,uint256 _a)external;}
 contract ERC721AC is IERC721,IERC721Metadata{
+    uint256 public count;
     address private _owner;
+    mapping(uint256=>GEN)public gen;
+    mapping(uint256=>OWL)private owl;
+    mapping(address=>uint256[])private tokens;
     mapping(uint256=>address)private _tokenApprovals;
     mapping(address=>mapping(address=>bool))private _operatorApprovals;
-    uint256 public count;
     IOwlWarLand private iOWL;
     struct OWL{
         address owner;
@@ -21,53 +24,24 @@ contract ERC721AC is IERC721,IERC721Metadata{
         uint256 maxCount;
         uint256 currentCount;
     }
-    mapping(uint256=>GEN)public gen;
-    mapping(uint256=>OWL)private owl;
-    mapping(address=>uint256[])private tokens;
-    modifier onlyOwner(){
-        require(_owner==msg.sender);_;
-    }
+    modifier onlyOwner(){require(_owner==msg.sender);_;}
     constructor(){
         _owner=msg.sender;
         gen[1].maxCount=168;
         gen[2].maxCount=1680;//TESTING VARIABLES
     }
-    function supportsInterface(bytes4 f)external pure returns(bool){
-        return f==type(IERC721).interfaceId||f==type(IERC721Metadata).interfaceId;
-    }
-    function balanceOf(address o)external view override returns(uint256){
-        return tokens[o].length;
-    }
-    function ownerOf(uint256 k)public view override returns(address){
-        return owl[k].owner;
-    }
-    function owner()external view returns(address){
-        return _owner;
-    }
-    function name()external pure override returns(string memory){
-        return"Whooli Hootie Conservation Club";
-    }
-    function symbol()external pure override returns(string memory){
-        return"WHCC";
-    }
-    function tokenURI(uint256 k)external view override returns(string memory){
-        return string(abi.encodePacked("ipfs://",owl[k].cid));
-    }
-    function approve(address t,uint256 k)external override{
-        require(msg.sender==ownerOf(k)||isApprovedForAll(ownerOf(k),msg.sender));
-        _tokenApprovals[k]=t;
-        emit Approval(ownerOf(k),t,k);
-    }
-    function getApproved(uint256 tokenId)public view override returns(address){
-        return _tokenApprovals[tokenId];
-    }
-    function setApprovalForAll(address p,bool a)external override{
-        _operatorApprovals[msg.sender][p]=a;
-        emit ApprovalForAll(msg.sender,p,a);
-    }
-    function isApprovedForAll(address o,address p)public view override returns(bool){
-        return _operatorApprovals[o][p];
-    }
+    function supportsInterface(bytes4 f)external pure returns(bool){return f==type(IERC721).interfaceId||f==type(IERC721Metadata).interfaceId;}
+    function balanceOf(address o)external view override returns(uint256){return tokens[o].length;}
+    function ownerOf(uint256 k)public view override returns(address){return owl[k].owner;}
+    function owner()external view returns(address){return _owner;}
+    function name()external pure override returns(string memory){return"Whooli Hootie Conservation Club";}
+    function symbol()external pure override returns(string memory){return"WHCC";}
+    function approve(address t,uint256 k)external override{require(msg.sender==ownerOf(k)||isApprovedForAll(ownerOf(k),msg.sender));_tokenApprovals[k]=t;emit Approval(ownerOf(k),t,k);}
+    function getApproved(uint256 tokenId)public view override returns(address){return _tokenApprovals[tokenId];}
+    function setApprovalForAll(address p,bool a)external override{_operatorApprovals[msg.sender][p]=a;emit ApprovalForAll(msg.sender,p,a);}
+    function isApprovedForAll(address o,address p)public view override returns(bool){return _operatorApprovals[o][p];}
+    function safeTransferFrom(address f,address t,uint256 k)external override{transferFrom(f,t,k);}
+    function safeTransferFrom(address f,address t,uint256 k,bytes memory d)external override{d=d;transferFrom(f,t,k);}
     function transferFrom(address f,address t,uint256 k)public override{unchecked{
         require(f==ownerOf(k)||getApproved(k)==f||isApprovedForAll(ownerOf(k),f));
         _tokenApprovals[k]=address(0);
@@ -83,12 +57,8 @@ contract ERC721AC is IERC721,IERC721Metadata{
         owl[k].owner=t;
         emit Transfer(f,t,k);
     }}
-    function safeTransferFrom(address f,address t,uint256 k)external override{
-        transferFrom(f,t,k);
-    }
-    function safeTransferFrom(address f,address t,uint256 k,bytes memory d)external override{
-        d=d;
-        transferFrom(f,t,k);
+    function tokenURI(uint256 k)external view override returns(string memory){
+        return string(abi.encodePacked("ipfs://",owl[k].cid));
     }
     function PLAYERITEMS(address a)external view returns(uint256[]memory r0,uint256[]memory r1,uint256[]memory r2,uint256[]memory r3,uint256[]memory r4,uint256[]memory r5,uint256[]memory r6){unchecked{
         uint256[]memory arr=tokens[a];
@@ -145,7 +115,7 @@ contract ERC721AC is IERC721,IERC721Metadata{
         _mint(a,1,s,r);
     }
     function MINT(uint256 s,string memory r)external payable{unchecked{
-        require(msg.value>=0.00 ether); /***[DEPLOYMENT SET TO 0.88]***/
+        require(msg.value>=0/*.88*/ ether);
         _mint(msg.sender,1,s,r);
     }}
     function BREED(uint256 p,uint256 q,uint256 s,string memory r)external payable{unchecked{
@@ -161,8 +131,8 @@ contract ERC721AC is IERC721,IERC721Metadata{
             owl[p].gen==owl[q].gen&& //must be same gen
             owl[p].owner==msg.sender&&owl[q].owner==msg.sender&& //must only owner of p and q
             (owl[p].sex==0&&owl[q].sex==1||owl[q].sex==0&&owl[p].sex==1)&& //must be different sex
-            owl[p].time+0<block.timestamp&&owl[q].time+0 days<block.timestamp);//time [DEPLOYMENT 7 days]
-        iOWL.BURN(msg.sender,30); //must have 30 OWL token
+            owl[p].time+0<block.timestamp&&owl[q].time+0/*7*/ days<block.timestamp);//time
+        iOWL.BURN(msg.sender,/*3*/0); //must have 30 OWL token
         _mint(msg.sender,owl[p].gen+1,s,r);
         owl[count].parent1=p;
         owl[count].parent2=q;
