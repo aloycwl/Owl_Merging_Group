@@ -84,9 +84,9 @@ contract ERC721AC is IERC721,IERC721Metadata{
         autoMerge(_i,1,msg.sender);
         CLAIM(msg.sender);
     }}
-    function PLAYERITEMS(address a)external view returns(uint256[]memory,uint256[]memory){unchecked{
-        uint256[]memory _items=new uint256[](player[a].balance);
-        uint256[]memory _levels=new uint256[](player[a].balance);
+    function PLAYERITEMS(address a)external view returns(uint256[]memory _items,uint256[]memory _levels){unchecked{
+        _items=new uint256[](player[a].balance);
+        _levels=new uint256[](player[a].balance);
         uint256 k;
         for(uint256 i=0;i<7;i++)for(uint256 j=0;j<player[a].item[i].length;j++){
             _items[k]=i;
@@ -130,8 +130,7 @@ contract ERC721AC is IERC721,IERC721Metadata{
             player[a].lastClaimed=block.timestamp; //reset claimed time
         }
     }}
-    function _getCount(uint256[]memory k,uint256 m)private view returns(uint256){unchecked{
-        uint256 c;
+    function _getCount(uint256[]memory k,uint256 m)private view returns(uint256 c){unchecked{
         for(uint256 i=0;i<k.length;i++)c+=m*3**(nft[k[i]].level-1)*(80+nft[k[i]].level*20)/100;
         return c;
     }}
