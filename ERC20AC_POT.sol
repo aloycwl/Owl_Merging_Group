@@ -7,8 +7,8 @@ contract ERC20AC_PotOfTea{
     uint256 private _totalSupply;
     modifier onlyAccess(){require(_access[msg.sender]);_;}
     constructor(){_access[msg.sender]=true;}
-    function name()external pure returns(string memory){return "Owl War Land";}
-    function symbol()external pure returns(string memory){return "OWL";}
+    function name()external pure returns(string memory){return"Pot Of Tea";}
+    function symbol()external pure returns(string memory){return"POT";}
     function decimals()external pure returns(uint8){return 18;}
     function totalSupply()external view returns(uint256){return _totalSupply;}
     function balanceOf(address account)external view returns(uint256){return _balances[account];}

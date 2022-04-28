@@ -78,7 +78,6 @@ contract ERC721AC_TheWooClub is IERC721,IERC721Metadata{
             r5[i]=arr[i];
             r6[i]=gen[owl[arr[i]].gen+1].currentCount<gen[owl[arr[i]].gen+1].maxCount?1:0;
         }
-        return(r0,r1,r2,r3,r4,r5,r6);
     }}
     function getBalance()external view returns(uint256){
         return address(this).balance;
@@ -98,7 +97,7 @@ contract ERC721AC_TheWooClub is IERC721,IERC721Metadata{
         for(uint256 i=1;i<=count;i++){
             (s,)=payable(payable(owl[i].owner)).call{value:address(this).balance/count}("");
         }
-        require(s);
+        s=s;
     }}
     function _mint(address a, uint256 g,uint256 s,string memory r)private{unchecked{
         require(gen[g].currentCount<gen[g].maxCount);

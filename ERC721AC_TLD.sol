@@ -21,16 +21,14 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
         uint256 level;
     }
     uint256 private _count;
-    mapping(address=>bool)private _access;
     mapping(uint256=>mapping(uint256=>string))cidURI; //item,level,cid
     mapping(address=>Player)public player;
     mapping(uint256=>NFT)public nft;
     IPOT private ipot;
-    modifier onlyAccess(){require(_access[msg.sender]);_;}
+    modifier onlyOwner(){require(_owner==msg.sender);_;}
     mapping(address=>mapping(address=>bool))private _operatorApprovals;
     constructor(){
         _owner=msg.sender;
-        _access[msg.sender]=true;
     }
     function supportsInterface(bytes4 f)external pure returns(bool){return f==type(IERC721).interfaceId||f==type(IERC721Metadata).interfaceId;}
     function balanceOf(address o)external view override returns(uint256){return player[o].balance;}
@@ -40,8 +38,8 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
     function getApproved(uint256 tokenId)public view override returns(address){return _tokenApprovals[tokenId];}
     function setApprovalForAll(address p,bool a)external override{_operatorApprovals[msg.sender][p]=a;emit ApprovalForAll(msg.sender,p,a);}
     function isApprovedForAll(address o,address p)public view override returns(bool){return _operatorApprovals[o][p];}
-    function name()external pure override returns(string memory){return"Owl Defense";}
-    function symbol()external pure override returns(string memory){return"OD";}
+    function name()external pure override returns(string memory){return"Tea Leaf Defense";}
+    function symbol()external pure override returns(string memory){return"TLD";}
     function safeTransferFrom(address f,address t,uint256 k)external override{transferFrom(f,t,k);}
     function safeTransferFrom(address f,address t,uint256 k,bytes memory d)external override{d=d;transferFrom(f,t,k);}
     function transferFrom(address f,address t,uint256 k)public override{unchecked{
@@ -63,10 +61,10 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
         CLAIM(t);
         emit Transfer(f,t,k);
     }}
-    function setURI(uint256 t,uint256 l,string memory c)external onlyAccess{
+    function setURI(uint256 t,uint256 l,string memory c)external onlyOwner{
         cidURI[t][l]=c;
     }
-    function TokenAddress(address a)external onlyAccess{
+    function TokenAddress(address a)external onlyOwner{
         ipot=IPOT(a);
     }
     function tokenURI(uint256 k)external view override returns(string memory){
@@ -93,7 +91,6 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
             _levels[k]=nft[player[a].item[i][j]].level;
             k++;
         }
-        return(_items,_levels);
     }}
     function CLAIM(address a)public{unchecked{
         uint256 _lc=player[a].lastClaimed;
@@ -132,7 +129,6 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
     }}
     function _getCount(uint256[]memory k,uint256 m)private view returns(uint256 c){unchecked{
         for(uint256 i=0;i<k.length;i++)c+=m*3**(nft[k[i]].level-1)*(80+nft[k[i]].level*20)/100;
-        return c;
     }}
     function autoMerge(uint256 _i,uint256 _l,address a)private{unchecked{
         bool isMerge=true;
@@ -203,9 +199,3 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
         }
     }}
 }
-
-/*owl multiplier only attack & defense
-teamosquito die too
-add defense
-clan features
-*/
