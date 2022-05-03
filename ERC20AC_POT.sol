@@ -25,7 +25,6 @@ contract ERC20AC_PotOfTea{
         return true;
     }
     function transferFrom(address from,address to,uint256 amount)public returns(bool){unchecked{
-        amount*=1e18;
         require(_balances[from]>=amount&&(from==msg.sender||_access[msg.sender]));
         _balances[from]-=amount;
         _balances[to]+=amount;
