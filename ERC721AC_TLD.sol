@@ -47,11 +47,10 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
         _tokenApprovals[k]=address(0);
         emit Approval(ownerOf(k),t,k);
         nft[k].owner=t;
-        for(uint256 i=0;i<player[f].item[nft[k].item].length;i++){
-            if(player[f].item[nft[k].item][i]==k){
-                player[f].item[nft[k].item][i]=player[f].item[nft[k].item][player[f].item[nft[k].item].length-1];
-                player[f].item[nft[k].item].pop();
-            }
+        for(uint256 i=0;i<player[f].item[nft[k].item].length;i++)
+        if(player[f].item[nft[k].item][i]==k){
+            player[f].item[nft[k].item][i]=player[f].item[nft[k].item][player[f].item[nft[k].item].length-1];
+            player[f].item[nft[k].item].pop();
         }
         player[t].item[nft[k].item].push(k);
         player[f].balance--;
