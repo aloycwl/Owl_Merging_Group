@@ -26,9 +26,7 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     }
     modifier onlyOwner(){require(_owner==msg.sender);_;}
     constructor(){
-        _owner=msg.sender;
-        gen[1].maxCount=168;
-        gen[2].maxCount=1680;//TESTING VARIABLES
+        (_owner,gen[1].maxCount,gen[2].maxCount)=(msg.sender,168,1680);//TESTING VARIABLES
     }
     function supportsInterface(bytes4 f)external pure returns(bool){return f==type(IERC721).interfaceId||f==type(IERC721Metadata).interfaceId;}
     function balanceOf(address o)external view override returns(uint256){return tokens[o].length;}
@@ -52,8 +50,7 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
             break;
         }
         tokens[t].push(k);
-        owl[k].parent1=owl[k].parent2=0;
-        owl[k].owner=t;
+        (owl[k].parent1,owl[k].parent2,owl[k].owner)=(0,0,t);
         emit Transfer(f,t,k);
     }}
     function tokenURI(uint256 k)external view override returns(string memory){
