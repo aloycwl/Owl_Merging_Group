@@ -52,8 +52,7 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
             break;
         }
         tokens[t].push(k);
-        owl[k].parent1=0;
-        owl[k].parent2=0;
+        owl[k].parent1=owl[k].parent2=0;
         owl[k].owner=t;
         emit Transfer(f,t,k);
     }}
@@ -62,21 +61,28 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     }
     function PLAYERITEMS(address a)external view returns(uint256[]memory r0,uint256[]memory r1,uint256[]memory r2,uint256[]memory r3,uint256[]memory r4,uint256[]memory r5,uint256[]memory r6){unchecked{
         uint256[]memory arr=tokens[a];
-        r0=new uint256[](arr.length);
-        r1=new uint256[](arr.length);
-        r2=new uint256[](arr.length);
-        r3=new uint256[](arr.length);
-        r4=new uint256[](arr.length);
-        r5=new uint256[](arr.length);
-        r6=new uint256[](arr.length);
-        for(uint256 i=0;i<arr.length;i++){
-            r0[i]=owl[arr[i]].parent1;
-            r1[i]=owl[arr[i]].parent2;
-            r2[i]=owl[arr[i]].time;
-            r3[i]=owl[arr[i]].gen;
-            r4[i]=owl[arr[i]].sex;
-            r5[i]=arr[i];
-            r6[i]=gen[owl[arr[i]].gen+1].currentCount<gen[owl[arr[i]].gen+1].maxCount?1:0;
+        uint256 l=arr.length;
+        uint256 ai;
+        r0=new uint256[](l);
+        r1=new uint256[](l);
+        r2=new uint256[](l);
+        r3=new uint256[](l);
+        r4=new uint256[](l);
+        r5=new uint256[](l);
+        r6=new uint256[](l);
+        OWL memory o;
+        GEN memory g;
+        for(uint256 i=0;i<l;i++){
+            ai=arr[i];
+            o=owl[ai];
+            g=gen[o.gen+1];
+            r0[i]=o.parent1;
+            r1[i]=o.parent2;
+            r2[i]=o.time;
+            r3[i]=o.gen;
+            r4[i]=o.sex;
+            r5[i]=ai;
+            r6[i]=g.currentCount<g.maxCount?1:0;
         }
     }}
     function getBalance()external view returns(uint256){
@@ -121,20 +127,24 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         address m=msg.sender;
         uint256[]memory t=tokens[m];
         bool existed;
+        uint256 bt=block.timestamp;
+        OWL memory op=owl[p];
+        OWL memory oq=owl[q];
+        uint256 og=op.gen;
         for(uint256 i=0;t.length>i;i++)
         if(((owl[t[i]].parent1==p&&owl[t[i]].parent2==q)||(owl[t[i]].parent2==p&&owl[t[i]].parent1==q))){
             existed=true;
             break;
         }
         require(!existed&& //never mint before
-            owl[p].gen==owl[q].gen&& //must be same gen
-            owl[p].owner==m&&owl[q].owner==m&& //must only owner of p and q
-            (owl[p].sex==0&&owl[q].sex==1||owl[q].sex==0&&owl[p].sex==1)&& //must be different sex
-            owl[p].time+0<block.timestamp&&owl[q].time+0/*7*/ days<block.timestamp);//time
-        ipot.BURN(m,/*3*/0); //must have 30 OWL token
-        _mint(m,owl[p].gen+1,s,r);
+            og==oq.gen&& //must be same gen
+            op.owner==m&&oq.owner==m&& //must only owner of p and q
+            (op.sex==0&&oq.sex==1||oq.sex==0&&op.sex==1)&& //must be different sex
+            op.time+0<bt&&oq.time+0/*7*/ days<bt);//time
+        //ipot.BURN(m,/*3*/0); //must have 30 OWL token
+        _mint(m,og+1,s,r);
         owl[count].parent1=p;
         owl[count].parent2=q;
-        owl[p].time=owl[q].time=block.timestamp;
+        owl[p].time=owl[q].time=bt;
     }}
 }
