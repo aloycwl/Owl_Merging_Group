@@ -136,15 +136,17 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
             isMerge=false;
             uint256[3] memory levelCount;
             uint256 j=0;
+            uint256 k;
+            uint256 l;
             for(uint256 i=0;i<player[a].item[_i].length;i++){
                 if(nft[player[a].item[_i][i]].level==_l){
                     if(j<levelCount.length)levelCount[j]=player[a].item[_i][i];
                     j++;
                     if(j==levelCount.length){
-                        for(uint256 k=0;k<levelCount.length;k++){
+                        for(k=0;k<levelCount.length;k++){
                             delete nft[levelCount[k]]; //REMIX: can't get back gas fee
                             emit Approval(a,address(0),levelCount[k]);
-                            for(uint256 l=0;l<player[a].item[_i].length;l++){
+                            for(l=0;l<player[a].item[_i].length;l++){
                                 if(player[a].item[_i][l]==levelCount[k]){
                                     player[a].item[_i][l]=player[a].item[_i][player[a].item[_i].length-1];
                                     player[a].item[_i].pop(); //REMIX: can't get back gas fee
