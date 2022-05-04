@@ -34,8 +34,8 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     function balanceOf(address o)external view override returns(uint256){return tokens[o].length;}
     function ownerOf(uint256 k)public view override returns(address){return owl[k].owner;}
     function owner()external view returns(address){return _owner;}
-    function name()external pure override returns(string memory){return"Whooli Hootie Conservation Club";}
-    function symbol()external pure override returns(string memory){return"WHCC";}
+    function name()external pure override returns(string memory){return"The Woobeing Club";}
+    function symbol()external pure override returns(string memory){return"TWC";}
     function approve(address t,uint256 k)external override{require(msg.sender==ownerOf(k)||isApprovedForAll(ownerOf(k),msg.sender));_tokenApprovals[k]=t;emit Approval(ownerOf(k),t,k);}
     function getApproved(uint256 tokenId)public view override returns(address){return _tokenApprovals[tokenId];}
     function setApprovalForAll(address p,bool a)external override{_operatorApprovals[msg.sender][p]=a;emit ApprovalForAll(msg.sender,p,a);}
@@ -118,24 +118,23 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         _mint(msg.sender,1,s,r);
     }}
     function BREED(uint256 p,uint256 q,uint256 s,string memory r)external payable{unchecked{
+        address m=msg.sender;
+        uint256[]memory t=tokens[m];
         bool existed;
-        for(uint256 i=0;tokens[msg.sender].length>i;i++){
-            if(((owl[tokens[msg.sender][i]].parent1==p&&owl[tokens[msg.sender][i]].parent2==q)||
-            (owl[tokens[msg.sender][i]].parent2==p&&owl[tokens[msg.sender][i]].parent1==q))){
-                existed=true;
-                break;
-            }
+        for(uint256 i=0;t.length>i;i++)
+        if(((owl[t[i]].parent1==p&&owl[t[i]].parent2==q)||(owl[t[i]].parent2==p&&owl[t[i]].parent1==q))){
+            existed=true;
+            break;
         }
         require(!existed&& //never mint before
             owl[p].gen==owl[q].gen&& //must be same gen
-            owl[p].owner==msg.sender&&owl[q].owner==msg.sender&& //must only owner of p and q
+            owl[p].owner==m&&owl[q].owner==m&& //must only owner of p and q
             (owl[p].sex==0&&owl[q].sex==1||owl[q].sex==0&&owl[p].sex==1)&& //must be different sex
             owl[p].time+0<block.timestamp&&owl[q].time+0/*7*/ days<block.timestamp);//time
-        ipot.BURN(msg.sender,/*3*/0); //must have 30 OWL token
-        _mint(msg.sender,owl[p].gen+1,s,r);
+        ipot.BURN(m,/*3*/0); //must have 30 OWL token
+        _mint(m,owl[p].gen+1,s,r);
         owl[count].parent1=p;
         owl[count].parent2=q;
-        owl[p].time=block.timestamp;
-        owl[q].time=block.timestamp;
+        owl[p].time=owl[q].time=block.timestamp;
     }}
 }
