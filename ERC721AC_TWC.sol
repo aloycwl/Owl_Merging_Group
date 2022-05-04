@@ -61,27 +61,15 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     }
     function PLAYERITEMS(address a)external view returns(uint256[]memory r0,uint256[]memory r1,uint256[]memory r2,uint256[]memory r3,uint256[]memory r4,uint256[]memory r5,uint256[]memory r6){unchecked{
         uint256[]memory arr=tokens[a];
-        uint256 l=arr.length;
-        uint256 ai;
-        r0=new uint256[](l);
-        r1=new uint256[](l);
-        r2=new uint256[](l);
-        r3=new uint256[](l);
-        r4=new uint256[](l);
-        r5=new uint256[](l);
-        r6=new uint256[](l);
+        (uint256 l,uint256 ai)=(arr.length,0);
+        (r0,r1,r2,r3)=(new uint256[](l),new uint256[](l),new uint256[](l),new uint256[](l));
+        (r4,r5,r6)=(new uint256[](l),new uint256[](l),new uint256[](l));
         OWL memory o;
         GEN memory g;
         for(uint256 i=0;i<l;i++){
-            ai=arr[i];
-            o=owl[ai];
-            g=gen[o.gen+1];
-            r0[i]=o.parent1;
-            r1[i]=o.parent2;
-            r2[i]=o.time;
-            r3[i]=o.gen;
-            r4[i]=o.sex;
-            r5[i]=ai;
+            (ai,o,g)=(arr[i],owl[ai],gen[o.gen+1]);
+            (r0[i],r1[i],r2[i])=(o.parent1,o.parent2,o.time);
+            (r3[i],r4[i],r5[i])=(o.gen,o.sex,ai);
             r6[i]=g.currentCount<g.maxCount?1:0;
         }
     }}
@@ -98,21 +86,16 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         gen[k].maxCount=m;
     }
     function DISTRIBUTE()external payable{unchecked{
-        bool s;
+        (bool s,uint256 ac)=(false,address(this).balance/count);
         (s,)=payable(payable(_owner)).call{value:address(this).balance*(gen[1].currentCount<168?95:5)/100}("");
-        for(uint256 i=1;i<=count;i++){
-            (s,)=payable(payable(owl[i].owner)).call{value:address(this).balance/count}("");
-        }
+        for(uint256 i=1;i<=count;i++)(s,)=payable(payable(owl[i].owner)).call{value:ac}("");
         s=s;
     }}
     function _mint(address a, uint256 g,uint256 s,string memory r)private{unchecked{
         require(gen[g].currentCount<gen[g].maxCount);
-        count++;
-        gen[g].currentCount++;
-        owl[count].owner=a;
-        owl[count].sex=s;
-        owl[count].cid=r;
-        owl[count].gen=g;
+        (count++,gen[g].currentCount++);
+        (owl[count].owner,owl[count].sex)=(a,s);
+        (owl[count].cid,owl[count].gen)=(r,g);
         tokens[a].push(count);
         emit Transfer(address(0),msg.sender,count);
     }}
@@ -124,13 +107,8 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         _mint(msg.sender,1,s,r);
     }}
     function BREED(uint256 p,uint256 q,uint256 s,string memory r)external payable{unchecked{
-        address m=msg.sender;
-        uint256[]memory t=tokens[m];
-        bool existed;
-        uint256 bt=block.timestamp;
-        OWL memory op=owl[p];
-        OWL memory oq=owl[q];
-        uint256 og=op.gen;
+        (address m,OWL memory op,OWL memory oq,bool existed)=(msg.sender,owl[p],owl[q],false);
+        (uint256 bt,uint256[]memory t,uint256 og)=(block.timestamp,tokens[m],op.gen);
         for(uint256 i=0;t.length>i;i++)
         if(((owl[t[i]].parent1==p&&owl[t[i]].parent2==q)||(owl[t[i]].parent2==p&&owl[t[i]].parent1==q))){
             existed=true;
@@ -143,8 +121,7 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
             op.time+0<bt&&oq.time+0/*7*/ days<bt);//time
         //ipot.BURN(m,/*3*/0); //must have 30 OWL token
         _mint(m,og+1,s,r);
-        owl[count].parent1=p;
-        owl[count].parent2=q;
+        (owl[count].parent1,owl[count].parent2)=(p,q);
         owl[p].time=owl[q].time=bt;
     }}
 }
