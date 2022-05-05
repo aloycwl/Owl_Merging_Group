@@ -5,12 +5,12 @@ interface IPOT{function BURN(address _t,uint _a)external;}
 contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     uint public count;
     address private _owner;
+    address private ipot;
     mapping(uint=>GEN)public gen;
     mapping(uint=>OWL)private owl;
     mapping(address=>uint[])private tokens;
     mapping(uint=>address)private _tokenApprovals;
     mapping(address=>mapping(address=>bool))private _operatorApprovals;
-    IPOT private ipot;
     struct OWL{
         address owner;
         uint parent1;
@@ -42,7 +42,7 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     function safeTransferFrom(address f,address t,uint k,bytes memory d)external override{d=d;transferFrom(f,t,k);}
     function getBalance()external view returns(uint){return address(this).balance;}
     function SetCid(uint k,string memory s)external{owl[k].cid=s;}
-    function TokenAddress(address a)external onlyOwner{ipot=IPOT(a);}
+    function TokenAddress(address a)external onlyOwner{ipot=a;}
     function GENPREP(uint k, uint m)external onlyOwner{gen[k].maxCount=m;}
     function transferFrom(address f,address t,uint k)public override{unchecked{
         require(f==ownerOf(k)||getApproved(k)==f||isApprovedForAll(ownerOf(k),f));
@@ -103,7 +103,7 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         require(op.sex==0&&oq.sex==1||oq.sex==0&&op.sex==1); //Different sex
         require(op.time+0<bt);
         require(oq.time+0/*7*/ days<bt); //Rested 7 days
-        //ipot.BURN(m,/*3*/0); //must have 30 OWL token
+        IPOT(ipot).BURN(msg.sender,/*3*/0); //must have 30 OWL token
         _mint(msg.sender,og+1,s,r);
         (owl[count].parent1,owl[count].parent2)=(p,q);
         owl[p].time=owl[q].time=bt;
