@@ -104,20 +104,22 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         _mint(msg.sender,1,s,r);
     }}
     function BREED(uint256 p,uint256 q,uint256 s,string memory r)external payable{unchecked{
-        (address m,OWL memory op,OWL memory oq,bool existed)=(msg.sender,owl[p],owl[q],false);
-        (uint256 bt,uint256[]memory t,uint256 og)=(block.timestamp,tokens[m],op.gen);
+        (OWL memory op,OWL memory oq,bool existed)=(owl[p],owl[q],false);
+        (uint256 bt,uint256[]memory t,uint256 og)=(block.timestamp,tokens[msg.sender],op.gen);
         for(uint256 i=0;t.length>i;i++)
         if(((owl[t[i]].parent1==p&&owl[t[i]].parent2==q)||(owl[t[i]].parent2==p&&owl[t[i]].parent1==q))){
             existed=true;
             break;
         }
-        require(!existed&& //never mint before
-            og==oq.gen&& //must be same gen
-            op.owner==m&&oq.owner==m&& //must only owner of p and q
-            (op.sex==0&&oq.sex==1||oq.sex==0&&op.sex==1)&& //must be different sex
-            op.time+0<bt&&oq.time+0/*7*/ days<bt);//time
+        require(!existed); //Not minted by same owner
+        require(og==oq.gen); //Same gen
+        require(op.owner==msg.sender);
+        require(oq.owner==msg.sender); //Is owner of parents
+        require(op.sex==0&&oq.sex==1||oq.sex==0&&op.sex==1); //Different sex
+        require(op.time+0<bt);
+        require(oq.time+0/*7*/ days<bt); //Rested 7 days
         //ipot.BURN(m,/*3*/0); //must have 30 OWL token
-        _mint(m,og+1,s,r);
+        _mint(msg.sender,og+1,s,r);
         (owl[count].parent1,owl[count].parent2)=(p,q);
         owl[p].time=owl[q].time=bt;
     }}
