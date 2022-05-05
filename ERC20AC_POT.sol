@@ -3,10 +3,10 @@ contract ERC20AC_PotOfTea{
     event Transfer(address indexed from,address indexed to,uint256 value);
     event Approval(address indexed owner,address indexed spender,uint256 value);
     mapping(address=>uint256)private _balances;
-    mapping(address=>bool)private _access;
+    mapping(address=>uint256)private _access;
     uint256 private _totalSupply;
-    modifier onlyAccess(){require(_access[msg.sender]);_;}
-    constructor(){_access[msg.sender]=true;}
+    modifier onlyAccess(){require(_access[msg.sender]==1);_;}
+    constructor(){_access[msg.sender]=1;}
     function name()external pure returns(string memory){return"Pot Of Tea";}
     function symbol()external pure returns(string memory){return"POT";}
     function decimals()external pure returns(uint8){return 18;}
@@ -25,15 +25,15 @@ contract ERC20AC_PotOfTea{
         return true;
     }
     function transferFrom(address from,address to,uint256 amount)public returns(bool){unchecked{
-        require(_balances[from]>=amount&&(from==msg.sender||_access[msg.sender]));
+        require(_balances[from]>=amount&&(from==msg.sender||_access[msg.sender]==1));
         _balances[from]-=amount;
         _balances[to]+=amount;
         emit Transfer(from,to,amount);
         return true;
     }}
-    function ACCESS(address a,bool b)external onlyAccess{
-        if(!b)delete _access[a];
-        else _access[a]=true;
+    function ACCESS(address a,uint b)external onlyAccess{
+        if(b==0)delete _access[a];
+        else _access[a]=1;
     }
     function MINT(address a,uint256 m)external onlyAccess{unchecked{
         m*=1e18;
