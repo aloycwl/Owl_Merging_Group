@@ -24,7 +24,6 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         uint maxCount;
         uint currentCount;
     }
-    modifier onlyOwner(){require(_owner==msg.sender);_;}
     constructor(){
         (_owner,gen[1].maxCount,gen[2].maxCount)=(msg.sender,168,1680);//TESTING VARIABLES
     }
@@ -39,11 +38,11 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     function setApprovalForAll(address p,bool a)external override{_operatorApprovals[msg.sender][p]=a;emit ApprovalForAll(msg.sender,p,a);}
     function isApprovedForAll(address o,address p)public view override returns(bool){return _operatorApprovals[o][p];}
     function safeTransferFrom(address f,address t,uint k)external override{transferFrom(f,t,k);}
-    function safeTransferFrom(address f,address t,uint k,bytes memory d)external override{d=d;transferFrom(f,t,k);}
+    function safeTransferFrom(address f,address t,uint k,bytes memory d)external override{d;transferFrom(f,t,k);}
     function getBalance()external view returns(uint){return address(this).balance;}
     function SetCid(uint k,string memory s)external{owl[k].cid=s;}
-    function TokenAddress(address a)external onlyOwner{ipot=a;}
-    function GENPREP(uint k, uint m)external onlyOwner{gen[k].maxCount=m;}
+    function TokenAddress(address a)external{require(_owner==msg.sender);ipot=a;}
+    function GENPREP(uint k, uint m)external{require(_owner==msg.sender);gen[k].maxCount=m;}
     function transferFrom(address f,address t,uint k)public override{unchecked{
         require(f==ownerOf(k)||getApproved(k)==f||isApprovedForAll(ownerOf(k),f));
         _tokenApprovals[k]=address(0);
@@ -51,7 +50,6 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         for(uint i=0;i<tokens[f].length;i++)if(tokens[f][i]==k){
             tokens[f][i]=tokens[f][tokens[f].length-1];
             tokens[f].pop();
-            break;
         }
         tokens[t].push(k);
         (owl[k].parent1,owl[k].parent2,owl[k].owner)=(0,0,t);
@@ -75,7 +73,7 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         (bool s,uint ac)=(false,address(this).balance/count);
         (s,)=payable(payable(_owner)).call{value:address(this).balance*(gen[1].currentCount<168?95:5)/100}("");
         for(uint i=1;i<=count;i++)(s,)=payable(payable(owl[i].owner)).call{value:ac}("");
-        s=s;
+        s;
     }}
     function _mint(address a, uint g,uint s,string memory r)private{unchecked{
         require(gen[g].currentCount<gen[g].maxCount);
@@ -84,8 +82,8 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         tokens[a].push(count);
         emit Transfer(address(0),msg.sender,count);
     }}
-    function AIRDROP(address a,uint s,string memory r)external onlyOwner{
-        _mint(a,1,s,r);
+    function AIRDROP(address a,uint s,string memory r)external{
+        require(_owner==msg.sender);_mint(a,1,s,r);
     }
     function MINT(uint s,string memory r)external payable{unchecked{
         require(msg.value>=0/*.88*/ ether);
