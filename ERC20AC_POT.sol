@@ -1,30 +1,30 @@
 pragma solidity^0.8.13;//SPDX-License-Identifier:None
 contract ERC20AC_PotOfTea{
-    event Transfer(address indexed from,address indexed to,uint256 value);
-    event Approval(address indexed owner,address indexed spender,uint256 value);
-    mapping(address=>uint256)private _balances;
-    mapping(address=>uint256)private _access;
-    uint256 private _totalSupply;
+    event Transfer(address indexed from,address indexed to,uint value);
+    event Approval(address indexed owner,address indexed spender,uint value);
+    mapping(address=>uint)private _balances;
+    mapping(address=>uint)private _access;
+    uint private _totalSupply;
     modifier onlyAccess(){require(_access[msg.sender]==1);_;}
     constructor(){_access[msg.sender]=1;}
     function name()external pure returns(string memory){return"Pot Of Tea";}
     function symbol()external pure returns(string memory){return"POT";}
     function decimals()external pure returns(uint8){return 18;}
-    function totalSupply()external view returns(uint256){return _totalSupply;}
-    function balanceOf(address account)external view returns(uint256){return _balances[account];}
-    function transfer(address to,uint256 amount)external returns(bool){
+    function totalSupply()external view returns(uint){return _totalSupply;}
+    function balanceOf(address account)external view returns(uint){return _balances[account];}
+    function transfer(address to,uint amount)external returns(bool){
         transferFrom(msg.sender,to,amount);
         return true;
     }
-    function allowance(address owner,address spender)external pure returns(uint256){
+    function allowance(address owner,address spender)external pure returns(uint){
         require(owner!=spender);
         return 0;
     }
-    function approve(address spender,uint256 amount)external returns(bool){
+    function approve(address spender,uint amount)external returns(bool){
         emit Approval(msg.sender,spender,amount);
         return true;
     }
-    function transferFrom(address from,address to,uint256 amount)public returns(bool){unchecked{
+    function transferFrom(address from,address to,uint amount)public returns(bool){unchecked{
         require(_balances[from]>=amount&&(from==msg.sender||_access[msg.sender]==1));
         _balances[from]-=amount;
         _balances[to]+=amount;
@@ -35,13 +35,13 @@ contract ERC20AC_PotOfTea{
         if(b==0)delete _access[a];
         else _access[a]=1;
     }
-    function MINT(address a,uint256 m)external onlyAccess{unchecked{
+    function MINT(address a,uint m)external onlyAccess{unchecked{
         m*=1e18;
         _totalSupply+=m;
         _balances[a]+=m;
         emit Transfer(address(0),a,m);
     }}
-    function BURN(address a,uint256 m)external onlyAccess{unchecked{
+    function BURN(address a,uint m)external onlyAccess{unchecked{
         m*=1e18;
         require(_balances[a]>=m);
         _balances[a]-=m;
