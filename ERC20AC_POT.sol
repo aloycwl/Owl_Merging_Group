@@ -1,7 +1,7 @@
 pragma solidity>0.8.0;//SPDX-License-Identifier:None
 contract ERC20AC_PotOfTea{
-    event Transfer(address indexed from,address indexed to,uint value);
-    event Approval(address indexed owner,address indexed spender,uint value);
+    event Transfer(address indexed a,address indexed b,uint value);
+    event Approval(address indexed a,address indexed b,uint value);
     mapping(address=>uint)private _balances;
     mapping(address=>uint)private _access;
     uint private _totalSupply;
@@ -11,9 +11,9 @@ contract ERC20AC_PotOfTea{
     function symbol()external pure returns(bytes32){return"POT";}
     function decimals()external pure returns(uint8){return 18;}
     function totalSupply()external view returns(uint){return _totalSupply;}
-    function balanceOf(address account)external view returns(uint){return _balances[account];}
-    function transfer(address to,uint amount)external returns(bool){
-        transferFrom(msg.sender,to,amount);
+    function balanceOf(address a)external view returns(uint){return _balances[a];}
+    function transfer(address a,uint b)external returns(bool){
+        transferFrom(msg.sender,a,b);
         return true;
     }
     function allowance(address a,address b)external pure returns(uint){
@@ -22,25 +22,25 @@ contract ERC20AC_PotOfTea{
     function approve(address a,uint b)external pure returns(bool){
         a;b;return true;
     }
-    function transferFrom(address from,address to,uint amount)public returns(bool){unchecked{
-        require(_balances[from]>=amount&&(from==msg.sender||_access[msg.sender]==1));
-        (_balances[from]-=amount,_balances[to]+=amount);
-        emit Transfer(from,to,amount);
+    function transferFrom(address a,address b,uint c)public returns(bool){unchecked{
+        require(_balances[a]>=c&&(a==msg.sender||_access[msg.sender]==1));
+        (_balances[a]-=c,_balances[b]+=c);
+        emit Transfer(a,b,c);
         return true;
     }}
     function ACCESS(address a,uint b)external onlyAccess{
         if(b==0)delete _access[a];
         else _access[a]=1;
     }
-    function MINT(address a,uint m)external onlyAccess{unchecked{
-        m*=1e18;
-        (_totalSupply+=m,_balances[a]+=m);
-        emit Transfer(address(0),a,m);
+    function MINT(address a,uint b)external onlyAccess{unchecked{
+        b*=1e18;
+        (_totalSupply+=b,_balances[a]+=b);
+        emit Transfer(address(0),a,b);
     }}
-    function BURN(address a,uint m)external onlyAccess{unchecked{
-        m*=1e18;
-        require(_balances[a]>=m);
-        (_balances[a]-=m,_totalSupply-=m);
-        emit Transfer(a,address(0),m);
+    function BURN(address a,uint b)external onlyAccess{unchecked{
+        b*=1e18;
+        require(_balances[a]>=b);
+        (_balances[a]-=b,_totalSupply-=b);
+        emit Transfer(a,address(0),b);
     }}
 }
