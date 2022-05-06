@@ -11,19 +11,8 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     mapping(address=>uint[])private tokens;
     mapping(uint=>address)private _tokenApprovals;
     mapping(address=>mapping(address=>bool))private _operatorApprovals;
-    struct OWL{
-        address owner;
-        uint parent1;
-        uint parent2;
-        uint time;
-        uint gen;
-        uint sex;
-        string cid;
-    }
-    struct GEN{
-        uint maxCount;
-        uint currentCount;
-    }
+    struct OWL{address owner;uint parent1;uint parent2;uint time;uint gen;uint sex;string cid;}
+    struct GEN{uint maxCount;uint currentCount;}
     constructor(){
         (_owner,gen[1].maxCount,gen[2].maxCount)=(msg.sender,168,1680);//TESTING VARIABLES
     }
@@ -94,9 +83,7 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         _mint(msg.sender,1,r);
     }}
     function BREED(uint a,uint b,string memory c)external payable{unchecked{
-        uint existed;
-        (OWL memory op,OWL memory oq)=(owl[a],owl[b]);
-        uint[]memory t=tokens[msg.sender];
+        (OWL memory op,OWL memory oq,uint[]memory t,uint existed)=(owl[a],owl[b],tokens[msg.sender],0);
         for(uint i=0;t.length>i;i++)
         if(((owl[t[i]].parent1==a&&owl[t[i]].parent2==b)||(owl[t[i]].parent2==a&&owl[t[i]].parent1==b)))existed=1;
         require(existed==0); //Not minted by same owner
