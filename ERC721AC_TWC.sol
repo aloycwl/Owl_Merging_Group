@@ -1,6 +1,6 @@
 pragma solidity>0.8.0;//SPDX-License-Identifier:None
-interface IERC721{event Transfer(address indexed a,address indexed b,uint indexed c);event Approval(address indexed a,address indexed b,uint indexed c);event ApprovalForAll(address indexed a,address indexed b,bool c);function balanceOf(address a)external view returns(uint b);function ownerOf(uint a)external view returns(address b);function safeTransferFrom(address a,address b,uint c)external;function transferFrom(address a,address b,uint c)external;function approve(address a,uint b)external;function getApproved(uint a)external view returns(address b);function setApprovalForAll(address a,bool b)external;function isApprovedForAll(address a,address b)external view returns(bool);function safeTransferFrom(address a,address b,uint c,bytes calldata data)external;}
-interface IERC721Metadata{function name()external view returns(string memory);function symbol()external view returns(string memory);function tokenURI(uint a)external view returns(string memory);}
+interface IERC721{event Transfer(address indexed from,address indexed to,uint indexed tokenId);event Approval(address indexed owner,address indexed approved,uint indexed tokenId);event ApprovalForAll(address indexed owner,address indexed operator,bool approved);function balanceOf(address)external view returns(uint);function safeTransferFrom(address,address,uint)external;function transferFrom(address,address,uint)external;function approve(address,uint)external;function getApproved(uint)external view returns(address);function setApprovalForAll(address,bool)external;function isApprovedForAll(address,address)external view returns(bool);function safeTransferFrom(address,address,uint,bytes calldata)external;}
+interface IERC721Metadata{function name()external view returns(string memory);function symbol()external view returns(string memory);function tokenURI(uint)external view returns(string memory);}
 interface IPOT{function BURN(address a,uint b)external;}
 contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     uint public count;
@@ -18,7 +18,7 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     }
     function supportsInterface(bytes4 a)external pure returns(bool){return a==type(IERC721).interfaceId||a==type(IERC721Metadata).interfaceId;}
     function balanceOf(address a)external view override returns(uint){return tokens[a].length;}
-    function ownerOf(uint a)public view override returns(address){return owl[a].owner;}
+    function ownerOf(uint a)public view returns(address){return owl[a].owner;}
     function owner()external view returns(address){return _owner;}
     function name()external pure override returns(string memory){return"The Woobeing Club";}
     function symbol()external pure override returns(string memory){return"TWC";}
@@ -29,7 +29,7 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     function safeTransferFrom(address a,address b,uint c)external override{transferFrom(a,b,c);}
     function safeTransferFrom(address a,address b,uint c,bytes memory d)external override{transferFrom(a,b,c);d;}
     function getBalance()external view returns(uint){return address(this).balance;}
-    function setCID(uint a,string memory b)external{owl[a].cid=b;}
+    function setCID(uint a,string memory b)external{require(_owner==msg.sender);owl[a].cid=b;}
     function TokenAddress(address a)external{require(_owner==msg.sender);ipot=a;}
     function GENPREP(uint a, uint b)external{require(_owner==msg.sender);gen[a].maxCount=b;}
     function transferFrom(address a,address b,uint c)public override{unchecked{
@@ -48,19 +48,13 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         return string(abi.encodePacked("ipfs://",owl[a].cid));
     }
     function PLAYERITEMS(address a)external view returns(uint[]memory r){unchecked{
-        uint l=tokens[a].length;
-        uint j;
+        (uint l,uint j)=(tokens[a].length,0);
         r=new uint[](l*7);
         for(uint i=0;i<l;i++){
             uint[]memory t=tokens[a];
             OWL memory o=owl[t[i]];
-            r[j]=o.parent1;j++;
-            r[j]=o.parent2;j++;
-            r[j]=o.time;j++;
-            r[j]=o.gen;j++;
-            r[j]=o.sex;j++;
-            r[j]=t[i];j++;
-            r[j]=gen[o.gen+1].currentCount<gen[o.gen+1].maxCount?1:0;j++;
+            (r[j]=o.parent1,j++,r[j]=o.parent2,j++,r[j]=o.time,j++,r[j]=o.gen,j++,r[j]=o.sex,j++);
+            (r[j]=t[i],j++,r[j]=gen[o.gen+1].currentCount<gen[o.gen+1].maxCount?1:0,j++);
         }
     }}
     function DISTRIBUTE()external payable{unchecked{
@@ -70,13 +64,13 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     }}
     function _mint(address a,uint b,string memory c)private{unchecked{
         require(gen[b].currentCount<gen[b].maxCount);
-        (count++,gen[b].currentCount++);
-        (owl[count].owner,owl[count].gen,owl[count].cid)=(a,b,c);
+        (count++,gen[b].currentCount++,owl[count].owner=a,owl[count].gen=b,owl[count].cid=c);
         tokens[a].push(count);
         emit Transfer(address(0),msg.sender,count);
     }}
-    function AIRDROP(address a,string memory b)external{
-        require(_owner==msg.sender);_mint(a,1,b);
+    function AIRDROP(address[]memory a,string[] memory b)external{
+        require(_owner==msg.sender);
+        for(uint i=0;i<a.length;i++)_mint(a[i],1,b[i]);
     }
     function MINT(string memory r)external payable{unchecked{
         require(msg.value>=0/*.88*/ ether);
@@ -95,12 +89,10 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         require(oq.time+0/*7*/ days<block.timestamp); //Rested 7 days
         IPOT(ipot).BURN(msg.sender,/*3*/0); //must have 30 POT token
         _mint(msg.sender,op.gen+1,c);
-        (owl[count].parent1,owl[count].parent2)=(a,b);
-        owl[a].time=owl[b].time=block.timestamp;
+        (owl[count].parent1=a,owl[count].parent2=b,owl[a].time=owl[b].time=block.timestamp);
     }}
     function REVEAL(uint a,uint b,string memory c)external{unchecked{
         require(msg.sender==owl[a].owner);
-        owl[a].sex=b;
-        owl[a].cid=c;
+        (owl[a].sex,owl[a].cid)=(b,c);
     }}
 }
