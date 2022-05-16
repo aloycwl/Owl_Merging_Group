@@ -1,7 +1,7 @@
 pragma solidity>0.8.0;//SPDX-License-Identifier:None
 interface IERC721{event Transfer(address indexed from,address indexed to,uint indexed tokenId);event Approval(address indexed owner,address indexed approved,uint indexed tokenId);event ApprovalForAll(address indexed owner,address indexed operator,bool approved);function balanceOf(address)external view returns(uint);function safeTransferFrom(address,address,uint)external;function transferFrom(address,address,uint)external;function approve(address,uint)external;function getApproved(uint)external view returns(address);function setApprovalForAll(address,bool)external;function isApprovedForAll(address,address)external view returns(bool);function safeTransferFrom(address,address,uint,bytes calldata)external;}
 interface IERC721Metadata{function name()external view returns(string memory);function symbol()external view returns(string memory);function tokenURI(uint)external view returns(string memory);}
-interface IPOT{function BURN(address a,uint b)external;}
+interface IPOT{function BURN(address,uint)external;}
 contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     uint public count;
     address private _owner;
@@ -13,8 +13,8 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     mapping(address=>mapping(address=>bool))private _operatorApprovals;
     struct OWL{address owner;uint parent1;uint parent2;uint time;uint gen;uint sex;string cid;}
     struct GEN{uint maxCount;uint currentCount;}
-    constructor(){
-        (_owner,gen[1].maxCount,gen[2].maxCount)=(msg.sender,168,1680);//TESTING VARIABLES
+    constructor(address a){
+        (ipot,_owner,gen[1].maxCount,gen[2].maxCount)=(a,msg.sender,168,1680);//TESTING VARIABLES
     }
     function supportsInterface(bytes4 a)external pure returns(bool){return a==type(IERC721).interfaceId||a==type(IERC721Metadata).interfaceId;}
     function balanceOf(address a)external view override returns(uint){return tokens[a].length;}
@@ -30,7 +30,6 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     function safeTransferFrom(address a,address b,uint c,bytes memory)external override{transferFrom(a,b,c);}
     function getBalance()external view returns(uint){return address(this).balance;}
     function setCID(uint a,string memory b)external{require(_owner==msg.sender);owl[a].cid=b;}
-    function TokenAddress(address a)external{require(_owner==msg.sender);ipot=a;}
     function GENPREP(uint a, uint b)external{require(_owner==msg.sender);gen[a].maxCount=b;}
     function transferFrom(address a,address b,uint c)public override{unchecked{
         require(a==ownerOf(c)||getApproved(c)==a||isApprovedForAll(ownerOf(c),a));
