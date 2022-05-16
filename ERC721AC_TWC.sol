@@ -27,7 +27,7 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     function setApprovalForAll(address a,bool b)external override{_operatorApprovals[msg.sender][a]=b;emit ApprovalForAll(msg.sender,a,b);}
     function isApprovedForAll(address a,address b)public view override returns(bool){return _operatorApprovals[a][b];}
     function safeTransferFrom(address a,address b,uint c)external override{transferFrom(a,b,c);}
-    function safeTransferFrom(address a,address b,uint c,bytes memory d)external override{transferFrom(a,b,c);d;}
+    function safeTransferFrom(address a,address b,uint c,bytes memory)external override{transferFrom(a,b,c);}
     function getBalance()external view returns(uint){return address(this).balance;}
     function setCID(uint a,string memory b)external{require(_owner==msg.sender);owl[a].cid=b;}
     function TokenAddress(address a)external{require(_owner==msg.sender);ipot=a;}
@@ -68,10 +68,10 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
         tokens[a].push(count);
         emit Transfer(address(0),msg.sender,count);
     }}
-    function AIRDROP(address[]memory a,string[] memory b)external{
+    function AIRDROP(address[]memory a,string[]memory b)external{unchecked{
         require(_owner==msg.sender);
         for(uint i=0;i<a.length;i++)_mint(a[i],1,b[i]);
-    }
+    }}
     function MINT(string memory r)external payable{unchecked{
         require(msg.value>=0/*.88*/ ether);
         _mint(msg.sender,1,r);
