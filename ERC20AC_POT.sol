@@ -1,7 +1,7 @@
 pragma solidity>0.8.0;//SPDX-License-Identifier:None
 contract ERC20AC_PotOfTea{
-    event Transfer(address indexed a,address indexed b,uint value);
-    event Approval(address indexed a,address indexed b,uint value);
+    event Transfer(address indexed from,address indexed to,uint value);
+    event Approval(address indexed from,address indexed to,uint value);
     mapping(address=>uint)private _balances;
     mapping(address=>uint)private _access;
     uint private _totalSupply;
