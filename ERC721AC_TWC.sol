@@ -1,6 +1,5 @@
 pragma solidity>0.8.0;//SPDX-License-Identifier:None
-interface IERC721{event Transfer(address indexed from,address indexed to,uint indexed tokenId);event Approval(address indexed owner,address indexed approved,uint indexed tokenId);event ApprovalForAll(address indexed owner,address indexed operator,bool approved);function balanceOf(address)external view returns(uint);function safeTransferFrom(address,address,uint)external;function transferFrom(address,address,uint)external;function approve(address,uint)external;function getApproved(uint)external view returns(address);function setApprovalForAll(address,bool)external;function isApprovedForAll(address,address)external view returns(bool);function safeTransferFrom(address,address,uint,bytes calldata)external;}
-interface IERC721Metadata{function name()external view returns(string memory);function symbol()external view returns(string memory);function tokenURI(uint)external view returns(string memory);}
+import"https://github.com/aloycwl/ERC_AC/blob/main/ERC721AC/more/standard_interface.sol";
 interface IPOT{function BURN(address,uint)external;}
 contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     uint public count;
@@ -18,7 +17,7 @@ contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
     }
     function supportsInterface(bytes4 a)external pure returns(bool){return a==type(IERC721).interfaceId||a==type(IERC721Metadata).interfaceId;}
     function balanceOf(address a)external view override returns(uint){return tokens[a].length;}
-    function ownerOf(uint a)public view returns(address){return owl[a].owner;}
+    function ownerOf(uint a)public view override returns(address){return owl[a].owner;}
     function owner()external view returns(address){return _owner;}
     function name()external pure override returns(string memory){return"The Woobeing Club";}
     function symbol()external pure override returns(string memory){return"TWC";}
