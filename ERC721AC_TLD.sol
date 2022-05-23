@@ -1,9 +1,7 @@
 pragma solidity>0.8.0;//SPDX-License-Identifier:None
-import"https://github.com/aloycwl/ERC_AC/blob/main/ERC721AC/more/standard_interface.sol";
+import"https://github.com/aloycwl/ERC_AC/blob/main/ERC721AC/ERC721AC.sol";
 interface IPOT{function MINT(address _t,uint256 _a)external;} 
-contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
-    address private _owner;
-    mapping(uint256=>address)private _tokenApprovals;
+contract ERC721AC_TeaLeafDefense is ERC721AC{
     struct Player{
         mapping(uint256=>uint256[])item; //0-sun 1-ocean 2-earth 3-plantation 4-cafe 5-swamp 6-fumigation
         uint256 light;
@@ -25,22 +23,18 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
     mapping(uint256=>NFT)public nft;
     IPOT private ipot;
     modifier onlyOwner(){require(_owner==msg.sender);_;}
-    mapping(address=>mapping(address=>bool))private _operatorApprovals;
     constructor(){
         _owner=msg.sender;
     }
-    function supportsInterface(bytes4 f)external pure returns(bool){return f==type(IERC721).interfaceId||f==type(IERC721Metadata).interfaceId;}
     function balanceOf(address o)external view override returns(uint256){return player[o].balance;}
     function ownerOf(uint256 k)public view override returns(address){return nft[k].owner;}
-    function owner()external view returns(address){return _owner;}
-    function approve(address t,uint256 k)external override{require(msg.sender==ownerOf(k)||isApprovedForAll(ownerOf(k),msg.sender));_tokenApprovals[k]=t;emit Approval(ownerOf(k),t,k);}
-    function getApproved(uint256 tokenId)public view override returns(address){return _tokenApprovals[tokenId];}
-    function setApprovalForAll(address p,bool a)external override{_operatorApprovals[msg.sender][p]=a;emit ApprovalForAll(msg.sender,p,a);}
-    function isApprovedForAll(address o,address p)public view override returns(bool){return _operatorApprovals[o][p];}
     function name()external pure override returns(string memory){return"Tea Leaf Defense";}
     function symbol()external pure override returns(string memory){return"TLD";}
-    function safeTransferFrom(address f,address t,uint256 k)external override{transferFrom(f,t,k);}
-    function safeTransferFrom(address f,address t,uint256 k,bytes memory d)external override{d=d;transferFrom(f,t,k);}
+    function setURI(uint256 t,uint256 l,string memory c)external onlyOwner{cidURI[t][l]=c;}
+    function TokenAddress(address a)external onlyOwner{ipot=IPOT(a);}
+    function tokenURI(uint256 k)external view override returns(string memory){
+        return string(abi.encodePacked("ipfs://",cidURI[nft[k].item][nft[k].level]));
+    }
     function transferFrom(address f,address t,uint256 k)public override{unchecked{
         require(f==ownerOf(k)||getApproved(k)==f||isApprovedForAll(ownerOf(k),f));
         _tokenApprovals[k]=address(0);
@@ -59,15 +53,7 @@ contract ERC721AC_TeaLeafDefense is IERC721,IERC721Metadata{
         CLAIM(t);
         emit Transfer(f,t,k);
     }}
-    function setURI(uint256 t,uint256 l,string memory c)external onlyOwner{
-        cidURI[t][l]=c;
-    }
-    function TokenAddress(address a)external onlyOwner{
-        ipot=IPOT(a);
-    }
-    function tokenURI(uint256 k)external view override returns(string memory){
-        return string(abi.encodePacked("ipfs://",cidURI[nft[k].item][nft[k].level]));
-    }
+    
     function MINT(uint256 _i)external payable{unchecked{
         require(msg.value>=0/*.05 DEVELOPMENT UNCOMMENT THIS*/ ether);
         _count++;
