@@ -1,33 +1,21 @@
 pragma solidity>0.8.0;//SPDX-License-Identifier:None
-import"https://github.com/aloycwl/ERC_AC/blob/main/ERC721AC/more/standard_interface.sol";
+import"https://github.com/aloycwl/ERC_AC/blob/main/ERC721AC/ERC721AC.sol";
 interface IPOT{function BURN(address,uint)external;}
-contract ERC721AC_TheWoobeingClub is IERC721,IERC721Metadata{
+contract ERC721AC_TheWoobeingClub is ERC721AC{
     uint public count;
-    address private _owner;
     address private ipot;
     mapping(uint=>GEN)public gen;
     mapping(uint=>OWL)private owl;
     mapping(address=>uint[])private tokens;
-    mapping(uint=>address)private _tokenApprovals;
-    mapping(address=>mapping(address=>bool))private _operatorApprovals;
     struct OWL{address owner;uint parent1;uint parent2;uint time;uint gen;uint sex;string cid;}
     struct GEN{uint maxCount;uint currentCount;}
     constructor(address a){
         (ipot,_owner,gen[1].maxCount,gen[2].maxCount)=(a,msg.sender,168,1680);//TESTING VARIABLES
     }
-    function supportsInterface(bytes4 a)external pure returns(bool){return a==type(IERC721).interfaceId||a==type(IERC721Metadata).interfaceId;}
     function balanceOf(address a)external view override returns(uint){return tokens[a].length;}
     function ownerOf(uint a)public view override returns(address){return owl[a].owner;}
-    function owner()external view returns(address){return _owner;}
     function name()external pure override returns(string memory){return"The Woobeing Club";}
     function symbol()external pure override returns(string memory){return"TWC";}
-    function approve(address a,uint b)external override{require(msg.sender==ownerOf(b)||isApprovedForAll(ownerOf(b),msg.sender));_tokenApprovals[b]=a;emit Approval(ownerOf(b),a,b);}
-    function getApproved(uint a)public view override returns(address){return _tokenApprovals[a];}
-    function setApprovalForAll(address a,bool b)external override{_operatorApprovals[msg.sender][a]=b;emit ApprovalForAll(msg.sender,a,b);}
-    function isApprovedForAll(address a,address b)public view override returns(bool){return _operatorApprovals[a][b];}
-    function safeTransferFrom(address a,address b,uint c)external override{transferFrom(a,b,c);}
-    function safeTransferFrom(address a,address b,uint c,bytes memory)external override{transferFrom(a,b,c);}
-    function getBalance()external view returns(uint){return address(this).balance;}
     function setCID(uint a,string memory b)external{require(_owner==msg.sender);owl[a].cid=b;}
     function GENPREP(uint a, uint b)external{require(_owner==msg.sender);gen[a].maxCount=b;}
     function transferFrom(address a,address b,uint c)public override{unchecked{
